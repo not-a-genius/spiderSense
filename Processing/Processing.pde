@@ -18,9 +18,15 @@ PFont orcFont;
 
 void setup() {
     size (1920, 1080); //Set screen resolution
-    smooth();
-    myPort = new Serial(this, portName, boudRate); // starts the serial communication
+    smooth();  //draw all with antialiasing
+    try{
+      myPort= new Serial(this,portName,9600);
+    }
+    catch(Exception e){
+      e.printStackTrace();
+    }
     myPort.bufferUntil('.'); // reads the data from the serial port up to the character '.'. So actually it reads this: angle,distance.
+
 }
 
 void draw() {
@@ -40,6 +46,7 @@ void draw() {
 
 void serialEvent (Serial myPort) { // starts reading data from the Serial Port
     // reads the data from the Serial Port up to the character '.' and puts it into the String variable "data".
+    try{
     data = myPort.readStringUntil('.');
     data = data.substring(0, data.length() - 1);
 
@@ -50,6 +57,8 @@ void serialEvent (Serial myPort) { // starts reading data from the Serial Port
     // converts the String variables into Integer
     iAngle = int(angle);
     iDistance = int(distance);
+    }
+    catch(Exception e){e.printStackTrace();}
 }
 
 void drawRadar() {
