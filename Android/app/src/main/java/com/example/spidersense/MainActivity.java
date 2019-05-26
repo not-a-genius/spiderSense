@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private BottomNavigationView bottomNav;
     private BluetoothAdapter mBluetoothAdapter;
-    private final int REQUEST_ENABLE_BT = 125;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
