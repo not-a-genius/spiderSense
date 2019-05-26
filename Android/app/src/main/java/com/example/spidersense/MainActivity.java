@@ -6,6 +6,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
@@ -15,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
 
     private NavController navController;
     private BottomNavigationView bottomNav;
+    private BluetoothAdapter mBluetoothAdapter;
+    private final int REQUEST_ENABLE_BT = 125;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +40,26 @@ public class MainActivity extends AppCompatActivity {
         //Setting up the action bar
         NavigationUI.setupActionBarWithNavController(this, navController);
 
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, 0);
+        }
+
     }
 
     @Override
     public boolean onSupportNavigateUp() {
         return NavigationUI.navigateUp(navController, (DrawerLayout) null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK){
+            // bluetooth enabled
+        }else{
+            // show error
+        }
     }
 }
