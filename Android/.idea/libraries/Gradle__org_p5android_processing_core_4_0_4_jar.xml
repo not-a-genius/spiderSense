@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.p5android:processing-core:4.0.4@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.p5android/processing-core/4.0.4/752cb99a767783b5a2ce31650b1b7bc6b522b33a/processing-core-4.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.p5android/processing-core/4.0.4/f360351bde1decf4e8513f9c4b4dab863f1bf73e/processing-core-4.0.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
