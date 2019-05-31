@@ -39,4 +39,7 @@ dependencies {
 
     //permission handler
     implementation 'com.karumi:dexter:5.0.0'
+
+    //processing
+    implementation 'org.p5android:processing-core:4.0.4'
 }
