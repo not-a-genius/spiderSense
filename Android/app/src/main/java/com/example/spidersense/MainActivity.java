@@ -6,12 +6,16 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +43,20 @@ public class MainActivity extends AppCompatActivity {
         //Setting up the action bar
         NavigationUI.setupActionBarWithNavController(this, navController);
 
+        //Request permission
+        PermissionListener dialogPermissionListener =
+                DialogOnDeniedPermissionListener.Builder
+                        .withContext(this.getApplicationContext())
+                        .withTitle("Location permission")
+                        .withMessage("Location permission is needed to use bluetooth!")
+                        .withButtonText(android.R.string.ok)
+                        .withIcon(R.drawable.ic_location)
+                        .build();
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                .withListener(dialogPermissionListener).check();
+
+        //Enable bluetooth
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

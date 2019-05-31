@@ -1,7 +1,9 @@
 package com.example.spidersense;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.preference.PreferenceManager;
@@ -34,10 +36,28 @@ public class SettingsFragment extends Fragment  implements View.OnClickListener 
 
     @Override
     public void onClick(View v) {
-        int theme = PreferenceManager.getDefaultSharedPreferences(getActivity()).getInt("ActivityTheme", R.style.AppTheme);
+        final int theme = PreferenceManager.getDefaultSharedPreferences(getActivity()).getInt("ActivityTheme", R.style.AppTheme);
         if(theme == R.style.AppTheme) PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
         else PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putInt("ActivityTheme", R.style.AppTheme).commit();
-        getActivity().recreate();
-        Toast.makeText(getActivity(), "Theme switched to " + ((theme == R.style.AppTheme) ? "dark" : "light"), Toast.LENGTH_SHORT).show();
+
+        // setup the alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+        builder.setTitle("AlertDialog");
+        builder.setMessage("It's necessary to restart the app for changing the theme!");
+
+        // add the buttons
+        builder.setPositiveButton("Restart now", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getActivity().recreate();
+                Toast.makeText(getActivity(), "Theme switched to " + ((theme == R.style.AppTheme) ? "dark" : "light"), Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Restart later", null);
+
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 }
