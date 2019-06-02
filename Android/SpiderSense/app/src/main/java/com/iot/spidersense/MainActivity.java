@@ -1,6 +1,7 @@
 package com.iot.spidersense;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -33,15 +34,19 @@ public class MainActivity extends AppCompatActivity {
     private PApplet sketch;
     private FrameLayout radarContainer;
     private LinearLayout settings;
+    private android.support.v7.app.ActionBar actionbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        actionbar = getSupportActionBar();
+        actionbar.setDisplayShowHomeEnabled(true);
+        actionbar.setIcon(R.drawable.ic_spider);
 
         int display_mode = getResources().getConfiguration().orientation;
         if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            getSupportActionBar().hide();
+            actionbar.hide();
         }
 
         // Gets the saved theme ID from SharedPrefs,
