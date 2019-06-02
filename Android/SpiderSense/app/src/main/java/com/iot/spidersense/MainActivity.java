@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Processing functions
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if (sketch != null) {
