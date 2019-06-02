@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 
 import processing.core.PApplet;
 
-public class Sketch extends PApplet {
+public class SketchFullScreen extends PApplet {
 
     private String angle = "";
     private String distance = "";
@@ -17,7 +17,7 @@ public class Sketch extends PApplet {
     private BluetoothAdapter mBluetoothAdapter;
 
     public void settings() {
-        size (1024, 768); //Set screen resolution
+        fullScreen(); //Set screen resolution
         smooth();  //draw all with antialiasing
 
     }

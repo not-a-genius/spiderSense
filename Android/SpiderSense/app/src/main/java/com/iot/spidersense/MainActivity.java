@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -31,11 +33,16 @@ public class MainActivity extends AppCompatActivity {
     private PApplet sketch;
     private FrameLayout radarContainer;
     private LinearLayout settings;
-    private Button changeThemeBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        int display_mode = getResources().getConfiguration().orientation;
+        if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getSupportActionBar().hide();
+        }
 
         // Gets the saved theme ID from SharedPrefs,
         // or uses default_theme if no theme ID has been saved
@@ -47,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         radarContainer = findViewById(R.id.radar_container);
         settings = findViewById(R.id.settings);
-        changeThemeBtn = findViewById(R.id.changeTheme);
+        Button changeThemeBtn = findViewById(R.id.changeTheme);
 
         //Set function change theme to button
         changeThemeBtn.setOnClickListener(new View.OnClickListener() {
@@ -118,7 +125,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Processing
-        sketch = new Sketch();
+        if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigationView.setVisibility(View.GONE);
+            sketch = new SketchFullScreen();
+        }
+        else {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            sketch = new Sketch();
+        }
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
     }
