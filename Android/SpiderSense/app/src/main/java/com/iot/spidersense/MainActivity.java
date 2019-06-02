@@ -1,33 +1,101 @@
 package com.iot.spidersense;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.ViewGroup;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import processing.android.CompatUtils;
 import processing.android.PFragment;
 import processing.core.PApplet;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Activity activity = this;
     private PApplet sketch;
+    private FrameLayout radarContainer;
+    private LinearLayout settings;
+    private Button changeThemeBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FrameLayout frame = new FrameLayout(this);
-        frame.setId(CompatUtils.getUniqueViewId());
-        frame.setBackgroundColor(0);
-        setContentView(frame, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Gets the saved theme ID from SharedPrefs,
+        // or uses default_theme if no theme ID has been saved
+        int theme = PreferenceManager.getDefaultSharedPreferences(this).getInt("ActivityTheme", R.style.AppTheme);
+        // Set this Activity's theme to the saved theme
+        setTheme(theme);
+
+        setContentView(R.layout.activity_main);
+
+        radarContainer = findViewById(R.id.radar_container);
+        settings = findViewById(R.id.settings);
+        changeThemeBtn = findViewById(R.id.changeTheme);
+
+        //Set function change theme to button
+        changeThemeBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                final int theme = PreferenceManager.getDefaultSharedPreferences(activity).getInt("ActivityTheme", R.style.AppTheme);
+                if(theme == R.style.AppTheme) PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
+                else PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt("ActivityTheme", R.style.AppTheme).commit();
+
+                // setup the alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle("AlertDialog");
+                builder.setMessage("It's necessary to restart the app for changing the theme!");
+
+                // add the buttons
+                builder.setPositiveButton("Restart now", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.recreate();
+                        Toast.makeText(activity, "Theme switched to " + ((theme == R.style.AppTheme) ? "dark" : "light"), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                builder.setNegativeButton("Restart later", null);
+
+                // create and show the alert dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
+
+        //Navbar
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener
+                (new BottomNavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.action_home:
+                                radarContainer.setVisibility(View.VISIBLE);
+                                settings.setVisibility(View.GONE);
+                                break;
+                            case R.id.action_settings:
+                                radarContainer.setVisibility(View.GONE);
+                                settings.setVisibility(View.VISIBLE);
+                                break;
+                        }
+                        return true;
+                    }
+                });
 
         //Request permission
         PermissionListener dialogPermissionListener =
@@ -49,9 +117,10 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableIntent, 0);
         }
 
+        //Processing
         sketch = new Sketch();
         PFragment fragment = new PFragment(sketch);
-        fragment.setView(frame, this);
+        fragment.setView(radarContainer, this);
     }
 
     @Override

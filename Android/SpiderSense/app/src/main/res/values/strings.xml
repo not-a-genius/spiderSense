@@ -2,4 +2,6 @@
     <string name="app_name">Spider Sense</string>
     <string name="change_theme_text">Change Theme: </string>
     <string name="change_theme_button">Light/Dark</string>
+    <string name="fragment_home">Home</string>
+    <string name="fragment_settings">Settings</string>
 </resources>
