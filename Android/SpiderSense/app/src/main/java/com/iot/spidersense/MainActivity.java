@@ -1,13 +1,13 @@
 package com.iot.spidersense;
 
 import android.Manifest;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private FrameLayout radarContainer;
     private LinearLayout settings;
     private android.support.v7.app.ActionBar actionbar;
+    private Boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +141,29 @@ public class MainActivity extends AppCompatActivity {
         }
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        //Checking for fragment count on backstack
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else if (!doubleBackToExitPressedOnce) {
+            radarContainer.setVisibility(View.VISIBLE);
+            settings.setVisibility(View.GONE);
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this,"Please click BACK again to exit.", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+        } else {
+            super.onBackPressed();
+            return;
+        }
     }
 
     @Override
