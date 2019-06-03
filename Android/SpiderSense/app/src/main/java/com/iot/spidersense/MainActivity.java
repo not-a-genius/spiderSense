@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -45,6 +46,7 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import processing.android.PFragment;
@@ -269,13 +271,19 @@ public class MainActivity extends AppCompatActivity {
             super.onConnectionStateChange(gatt, status, newState);
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
-                    Log.i("GattCallback", "connected");
+                    Log.i("GattCallback", "Connected");
                     gatt.getServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.i("GattCallback", "Disconnected");
                     break;
             }
+        }
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+
+            //Now we can start reading/writing characteristics
+
         }
     };
 
