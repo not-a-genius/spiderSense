@@ -30,10 +30,37 @@
             android:textSize="20sp"/>
 
         <Button
-            android:id="@+id/changeTheme"
+            android:id="@+id/changeThemeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/change_theme_button"
+            android:textSize="20sp"/>
+
+        <Button
+            android:id="@+id/telegramButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Try telegram bot"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deviceView"
+            android:text="No device"/>
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Scan"
+            android:textSize="20sp"/>
+
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stop Scan"
             android:textSize="20sp"/>
 
     </LinearLayout>

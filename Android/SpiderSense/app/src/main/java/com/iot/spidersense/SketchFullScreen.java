@@ -19,7 +19,6 @@ public class SketchFullScreen extends PApplet {
     public void settings() {
         fullScreen(); //Set screen resolution
         smooth();  //draw all with antialiasing
-
     }
 
     public void setup() {
