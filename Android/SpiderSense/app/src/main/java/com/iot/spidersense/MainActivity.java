@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -30,17 +31,27 @@ import processing.core.PApplet;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Activity activity = this;
+    private Activity activity;
     private PApplet sketch;
     private FrameLayout radarContainer;
     private LinearLayout settings;
-    private android.support.v7.app.ActionBar actionbar;
+    private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
+    private int theme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        actionbar = getSupportActionBar();
+        activity = this;
+
+        // Gets the saved theme ID from SharedPrefs,
+        // or uses default_theme if no theme ID has been saved
+        preferenceManager = PreferenceManager.getDefaultSharedPreferences(this);
+        theme = preferenceManager.getInt("ActivityTheme", R.style.AppTheme);
+        // Set this Activity's theme to the saved theme
+        setTheme(theme);
+
+        android.support.v7.app.ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayShowHomeEnabled(true);
         actionbar.setIcon(R.drawable.ic_spider);
 
@@ -49,12 +60,6 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             actionbar.hide();
         }
-
-        // Gets the saved theme ID from SharedPrefs,
-        // or uses default_theme if no theme ID has been saved
-        int theme = PreferenceManager.getDefaultSharedPreferences(this).getInt("ActivityTheme", R.style.AppTheme);
-        // Set this Activity's theme to the saved theme
-        setTheme(theme);
 
         setContentView(R.layout.activity_main);
 
@@ -65,9 +70,8 @@ public class MainActivity extends AppCompatActivity {
         //Set function change theme to button
         changeThemeBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                final int theme = PreferenceManager.getDefaultSharedPreferences(activity).getInt("ActivityTheme", R.style.AppTheme);
-                if(theme == R.style.AppTheme) PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
-                else PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt("ActivityTheme", R.style.AppTheme).commit();
+                if(theme == R.style.AppTheme) preferenceManager.edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
+                else preferenceManager.edit().putInt("ActivityTheme", R.style.AppTheme).commit();
 
                 // setup the alert builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Navbar
-        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener
                 (new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
