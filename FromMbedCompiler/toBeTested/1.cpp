@@ -1,16 +1,30 @@
+/* mbed Microcontroller Library
+ * Copyright (c) 2006-2013 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+#include <string.h>
 #include "mbed.h"
-//radar libs
+#include "BLE.h"
+ 
+#include "UARTService.h"
+#include "BatteryService.h"
+#include "DeviceInformationService.h" 
+
 #include "Servo.h"
 #include "HCSR04.h"
 //#include "beep.h"
-
-//bluetooth libs
-//#include "ble/BLE.h"
-#include "ble/services/HeartRateService.h"
-
-#if !defined(IDB0XA1_D13_PATCH)
-DigitalOut led1(LED1, 1);   // LED conflicts SPI_CLK in case of D13 patch
-#endif
 
 
 //useful defines
@@ -47,11 +61,16 @@ int ultraDistance=-1;
 // Creates a servo object for controlling the servo motor
 Servo myServo(D2);
 
-//names and services for ble
-const static char     DEVICE_NAME[]        = "SpiderSense";
-static const uint16_t uuid16_list[]        = {GattService::UUID_HEART_RATE_SERVICE};
+static const uint16_t uuid16_list[] = {GattService::UUID_BATTERY_SERVICE,
+                                GattService::UUID_DEVICE_INFORMATION_SERVICE};
 
-static volatile bool  triggerSensorPolling = false;
+BLEDevice  ble;
+
+//Used to access the defined in main UARTService object globally.
+UARTService *uart;
+
+//Keeping a receive buffer to alter the data received.
+uint8_t DatatoSend[1000];
 
 //-------------------------|||   RADAR FUNCTIONS     |||----------------------------------
 
@@ -96,128 +115,61 @@ void checkDistance()
 
 }
 
-
-
-//-------------------------|||   BLE FUNCTIONS     |||----------------------------------
-
+//----------------------------------------||| BLE |||--------------------------------------------------------------
+ 
 void disconnectionCallback(const Gap::DisconnectionCallbackParams_t *params)
 {
-    pc.printf("[BLE] Disconnected. \n");
-    (void)params;
-    BLE::Instance().gap().startAdvertising(); // restart advertising
+    pc.printf("\n Disconnected.!!\n");
+    pc.printf("\n Restarting the advertising process.\n");
+    ble.startAdvertising();
 }
 
+//Called just to wake up from sleep
 void periodicCallback(void)
 {
-#if !defined(IDB0XA1_D13_PATCH)
-    led1 = !led1; /* Do blinky on LED1 while we're waiting for BLE events */
-#endif
-
-    /* Note that the periodicCallback() executes in interrupt context, so it is safer to do
-     * heavy-weight sensor polling from the main thread. */
-    triggerSensorPolling = true;
 }
 
-void onBleInitError(BLE &ble, ble_error_t error)
+void onDataWritten(const GattWriteCallbackParams *params)
 {
-    pc.printf("[ERROR] onBleInitError \n");
-    (void)ble;
-    (void)error;
-    /* Initialization error handling should go here */
-}
-
-void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
-{
-    pc.printf("[BLE] starting initialization \n");
-    BLE&        ble   = params->ble;
-    ble_error_t error = params->error;
-
-    if (error != BLE_ERROR_NONE) {
-        pc.printf("[ERROR] error != BLE_ERROR_NONE \n");
-        onBleInitError(ble, error);
-        return;
-    }
-
-    if (ble.getInstanceID() != BLE::DEFAULT_INSTANCE) {
-        pc.printf("[ERROR] ist id not default \n");
-        return;
-    }
-
-    ble.gap().onDisconnection(disconnectionCallback);
-
-    /* Setup primary service. */
-    uint8_t hrmCounter = 60; // init HRM to 60bps
-    HeartRateService hrService(ble, hrmCounter, HeartRateService::LOCATION_FINGER);
-
-    /* Setup advertising. */
-    ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED | GapAdvertisingData::LE_GENERAL_DISCOVERABLE);
-    ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LIST_16BIT_SERVICE_IDS, (uint8_t *)uuid16_list, sizeof(uuid16_list));
-    ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::GENERIC_HEART_RATE_SENSOR);
-    ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::COMPLETE_LOCAL_NAME, (uint8_t *)DEVICE_NAME, sizeof(DEVICE_NAME));
-    ble.gap().setAdvertisingType(GapAdvertisingParams::ADV_CONNECTABLE_UNDIRECTED);
-    ble.gap().setAdvertisingInterval(1000); /* 1000ms */
-    ble.gap().startAdvertising();
-    pc.printf("[BLE] Setup complete \n");
-
-    // infinite loop
-    while (true) {
-        // check for trigger from periodicCallback()
-        bool isConnected=ble.getGapState().connected; 
-        pc.printf("[INFO] poll: %d connected :%d \n",triggerSensorPolling, isConnected);
-        if (triggerSensorPolling && isConnected) {
-            triggerSensorPolling = false;
-
-            // Do blocking calls or whatever is necessary for sensor polling.
-            // In our case, we simply update the HRM measurement.
-            hrmCounter++;
-
-            //  60 <= HRM bps <= 100
-            if (hrmCounter == 100) {
-                hrmCounter = 60;
-            }
-
-            // update bps
-            hrService.updateHeartRate(hrmCounter);
-        } else {
-            pc.printf("[BLE] waiting for events \n");
-            ble.waitForEvent(); // low power wait for event
+    /*if received something, print it out on PC screen*/
+    if ((uart != NULL) && (params->handle == uart->getTXCharacteristicHandle())) {
+        uint16_t bytesRead = params->len;
+ 
+        pc.printf("Data Received\n");
+        /*for all received data, send a copy back to the BLE central(in this case the phone app)*/
+        for(int j=0;j<bytesRead;j++)
+        {
+            pc.printf(" %x\n",*((params->data)+j));
+            DatatoSend[j]=(*((params->data)+j));
         }
-        pc.printf("newRound\n");
-
-        // rotates the servo motor from 15 to 165 degrees
-        for(int i=15; i<=165; i++) {
-            //pc.printf("moving: %d \n",i);
-            printAngleAndDistance(i);
-    //        checkDistance();
-
-            wait_ms(100);
+        
+        wait(1);
+        
+        ble.updateCharacteristicValue(uart->getRXCharacteristicHandle(), DatatoSend, bytesRead);
+        //Use the below statement for loopback.
+        //ble.updateCharacteristicValue(uart->getRXCharacteristicHandle(), params->data, bytesRead);
+        
+        /*print out what have just been sent*/
+        pc.printf("Data Sent\n");
+        for(int j=0;j<bytesRead;j++)
+        {
+            pc.printf(" %x\n",DatatoSend[j]);
         }
-
-        // Repeats the previous lines from 165 to 15 degrees
-        for(int i=165; i>15; i--) {
-            printAngleAndDistance(i);
-            checkDistance();
-            wait_ms(100);
-        }
-    
+        
+        wait(1);
     }
 }
-
-
-//-------------------------|||   MAIN     |||----------------------------------
 
 int main(void)
 {
+    
     pc.baud(9600);
-    pc.printf("[INFO] Spidersense started \n");
+    pc.printf("Hello, starting BlueNRG Serial Console Demo!\n");
     Ticker ticker;
-    ticker.attach(periodicCallback, 1); // blink LED every second
-    pc.printf("[INFO] Calling instance \n");
-    //BLE &ble = BLE::Instance();
-    BLEDevice ble;
-    pc.printf("[INFO] Calling init complete \n");
+    ticker.attach(periodicCallback, 1);
+ 
+    pc.printf("Initialising the module\n\r");
     ble.init();
-
     ble.onDisconnection(disconnectionCallback);
     ble.onDataWritten(onDataWritten);
     
@@ -237,11 +189,9 @@ int main(void)
     ble.accumulateAdvertisingPayload(GapAdvertisingData::INCOMPLETE_LIST_16BIT_SERVICE_IDS, (uint8_t *)uuid16_list, sizeof(uuid16_list));                               
     ble.setAdvertisingInterval(160); /* 100ms; in multiples of 0.625ms. */
     ble.startAdvertising();
-    pc.printf("Started Advertising.\n");
+    pc.printf("Start Advertising.\n");
  
     while (true) {
         ble.waitForEvent();
     }
-
-      
 }
