@@ -31,7 +31,7 @@ DiscoveredCharacteristic ledCharacteristic;
 uint8_t toggledValue = 0;
 enum {
   READ = 0,
-  WRITE,
+  WRITE,  
   IDLE
 };
 static volatile unsigned int triggerOp = IDLE;
@@ -95,7 +95,8 @@ void connectionCallback(const Gap::ConnectionCallbackParams_t *params) {
  
 void triggerToggledWrite(const GattReadCallbackParams *response) {
   if (response->handle == ledCharacteristic.getValueHandle()) {
-#if 0
+#
+if 0
     printf("triggerToggledWrite: handle %u, offset %u, len %u\r\n", response->handle, response->offset, response->len);
     for (unsigned index = 0; index < response->len; index++) {
       printf("%c[%02x]", response->data[index], response->data[index]);

@@ -171,7 +171,6 @@ int main(void)
     pc.printf("Initialising the module\n\r");
     ble.init();
     ble.onDisconnection(disconnectionCallback);
-    ble.onDataWritten(onDataWritten);
     
     UARTService uartService(ble);
     uart = &uartService;
