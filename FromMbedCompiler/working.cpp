@@ -41,8 +41,8 @@ HCSR04 sensor = HCSR04(D9, D8);
 Servo myServo(D10);
 
 // Define pins for LEDs
-//DigitalOut greenLED(D12);
-//DigitalOut redLED(D11);
+DigitalOut greenLED(D4);
+DigitalOut redLED(D2);
 
 // Variables for the duration and the distance
 long duration;
@@ -115,7 +115,6 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
     /* Setup primary service. */
     uint8_t hrmCounter = 60; // init HRM to 60bps
     HeartRateService hrService(ble, hrmCounter, HeartRateService::LOCATION_FINGER);
-    int angle = 30;
 
     /* Setup advertising. */
     ble.gap().accumulateAdvertisingPayload(GapAdvertisingData::BREDR_NOT_SUPPORTED | GapAdvertisingData::LE_GENERAL_DISCOVERABLE);
@@ -137,6 +136,13 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
             for(int i=15; i<=165; i++) {
                 myServo.SetPosition(500 + (i * 12.1212));
                 hrmCounter = calculateDistance();
+                if(hrmCounter < 20) {
+                    greenLED = LOW ;
+                    redLED = HIGH;
+                } else {
+                    redLED = LOW ;
+                    greenLED = HIGH ;
+                }
                 // update bps
                 hrService.updateHeartRate(hrmCounter);
                 wait_ms(100);
@@ -146,7 +152,13 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
             for(int i=165; i>15; i--) {
                 myServo.SetPosition(500 + (i * 12.1212));
                 hrmCounter = calculateDistance();
-                // update bps
+                if(hrmCounter < 20) {
+                    greenLED = LOW ;
+                    redLED = HIGH;
+                } else {
+                    redLED = LOW ;
+                    greenLED = HIGH ;
+                }
                 hrService.updateHeartRate(hrmCounter);
                 wait_ms(100);
             }
