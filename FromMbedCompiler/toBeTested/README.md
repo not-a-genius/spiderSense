@@ -10,7 +10,9 @@
 5. ledBlinkerCode.cpp : using led to do ???
 6. bleWithExpansionBoard.cpp : uses expansion board to read data and print them on uart and ble to do common hrs 
 7. bleMoreMainAsPossible.cpp : usual hrs example but more code into main as possible
-8. otherUartBle
-9.
+8. otherUartBle.cpp
+9. batteryLevelOriginal.cpp : very similar to hrs example
+10. modified API https://os.mbed.com/users/TianyouTong/code/BLE_API_modified_UARTService_for_IDB0XA1/
+
 
 N.B hrs = Hear Rate Sensor
