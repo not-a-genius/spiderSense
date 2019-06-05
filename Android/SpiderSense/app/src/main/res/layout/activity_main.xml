@@ -43,24 +43,25 @@
             android:text="Try telegram bot"
             android:textSize="20sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/deviceView"/>
-
         <Button
             android:id="@+id/startButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Scan"
+            android:text="Connect"
             android:textSize="20sp"/>
 
         <Button
             android:id="@+id/stopButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stop Scan"
+            android:text="Disconnect"
+            android:visibility="gone"
             android:textSize="20sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/deviceView"/>
 
     </LinearLayout>
 
