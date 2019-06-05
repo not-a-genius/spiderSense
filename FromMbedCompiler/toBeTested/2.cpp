@@ -101,19 +101,7 @@ void printAngleAndDistance(int angle)
 
 }
 
-//function to check if there is obstacle or note based on ultraDistance value
-void checkDistance()
-{
-    if(ultraDistance < 20) {
-        greenLED = LOW ;
-        redLED = HIGH;
-        //buzzer.beep(1000, 0.5);
-    } else {
-        redLED = LOW ;
-        greenLED = HIGH ;
-    }
 
-}
 
 //----------------------------------------||| BLE |||--------------------------------------------------------------
  
