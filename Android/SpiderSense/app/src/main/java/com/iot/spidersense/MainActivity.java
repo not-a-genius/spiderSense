@@ -70,7 +70,7 @@ import processing.core.PApplet;
 public class MainActivity extends AppCompatActivity {
 
     private Activity activity;
-    private PApplet sketch;
+    private Sketch sketch;
     private FrameLayout radarContainer;
     private LinearLayout settings;
     private SharedPreferences preferenceManager;
@@ -209,11 +209,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        drawButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                sketch.set
-            }
-        });
 
         //Navbar
         BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
@@ -265,13 +260,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Processing
+        sketch = new Sketch();
         if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView.setVisibility(View.GONE);
-            sketch = new SketchFullScreen();
+            sketch.setScreenMode("fullscreen");
         }
         else {
             bottomNavigationView.setVisibility(View.VISIBLE);
-            sketch = new Sketch();
+            sketch.setScreenMode("normal");
         }
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
@@ -388,6 +384,9 @@ public class MainActivity extends AppCompatActivity {
             final int heartRate = characteristic.getIntValue(format, 1);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             textview.append("Value: "+heartRate+"\n");
+            sketch.setDistance( heartRate);
+
+
         }
         else if (UUID_BATTERY_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
@@ -395,6 +394,7 @@ public class MainActivity extends AppCompatActivity {
             final int battery = characteristic.getIntValue(format, 0);
             Log.d(TAG, String.format("Received battery: %d", battery));
             textview.append("Value: "+battery+"\n");
+            sketch.setAngle(battery);
         }
         else {
             // For all other profiles, writes the data formatted in HEX.
@@ -457,6 +457,10 @@ public class MainActivity extends AppCompatActivity {
             sketch.onNewIntent(intent);
         }
     }
+    private void updateSketch(Sketch sketch,int distance, int angle) {
+        sketch.setDistance(distance);
+        sketch.setAngle(angle);
+    }
 
     public void enableGPS() {
         LocationRequest locationRequest = LocationRequest.create();
@@ -464,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
 
         Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(MainActivity.this).checkLocationSettings(builder.build());
-
         result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
             @Override
             public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
