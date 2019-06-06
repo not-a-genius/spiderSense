@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
-    private Button changeThemeButton, telegramButton, startButton, stopButton;
+    private Button changeThemeButton, telegramButton, startButton, stopButton, drawButton;
     private TextView textview;
 
     private final static int REQUEST_ENABLE_BT = 1;
@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         telegramButton = findViewById(R.id.telegramButton);
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
+        drawButton = findViewById(R.id.drawButton);
         textview = findViewById(R.id.deviceView);
         textview.setMovementMethod(new ScrollingMovementMethod());
 
@@ -202,6 +203,11 @@ public class MainActivity extends AppCompatActivity {
                     btGatt.close();
                     btGatt = null;
                 }
+            }
+        });
+        drawButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                sketch.set
             }
         });
 

@@ -114,7 +114,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
                 myServo.SetPosition(500 + (i * 12.1212));
                 distance = calculateDistance();
                 angle = i;
-                if(angle < 20) {
+                if(distance < 20) {
                     greenLED = LOW ;
                     redLED = HIGH;
                 } else {
@@ -124,7 +124,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
                 // update bps
                 distanceService.updateHeartRate(distance);
                 angleService.updateBatteryLevel(angle);
-                wait_ms(200);
+                wait_ms(100);
             }
 
         // Repeats the previous lines from 165 to 15 degrees
@@ -132,7 +132,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
                 myServo.SetPosition(500 + (i * 12.1212));
                 distance = calculateDistance();
                 angle = i;
-                if(angle < 20) {
+                if(distance < 20) {
                     greenLED = LOW ;
                     redLED = HIGH;
                 } else {
@@ -141,7 +141,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
                 }
                 distanceService.updateHeartRate(distance);
                 angleService.updateBatteryLevel(angle);
-                wait_ms(200);
+                wait_ms(100);
             }
             
 
