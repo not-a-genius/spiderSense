@@ -8,13 +8,14 @@ public class Sketch extends PApplet {
     private BluetoothAdapter btAdapter = null;
     private String mac = "C6:50:E7:03:82:BE";
 
-    private String angle = "";
-    private String distance = "";
-    private String data = "";
+    private int angle = 0;
+    private int distance = 0;
     private String noObject;
     private float pixsDistance;
-    private int iAngle, iDistance;
-    private int index1 = 0;
+
+    public void setAngle(int i) {
+        this.angle = i;
+    }
 
     public void settings() {
         size (1024, 768); //Set screen resolution
@@ -22,20 +23,6 @@ public class Sketch extends PApplet {
     }
 
     public void setup() {
-        btAdapter = BluetoothAdapter.getDefaultAdapter();
-    }
-
-    public void bluetoothEvent() {
-        data = 15 + "," + 35 + ".";
-        data = data.substring(0, data.length() - 1);
-
-        index1 = data.indexOf(","); // find the character ',' and puts it into the variable "index1"
-        angle = data.substring(0, index1); // read the data from position "0" to position of the variable index1 or thats the value of the angle the Arduino Board sent into the Serial Port
-        distance = data.substring(index1 + 1, data.length()); // read the data from position "index1" to the end of the data pr thats the value of the distance
-
-        // converts the String variables into Integer
-        iAngle = Integer.parseInt(angle);
-        iDistance = Integer.parseInt(distance);
     }
 
     public void draw() {
@@ -80,9 +67,9 @@ public class Sketch extends PApplet {
         translate(width/2, height - height * 0.074f); // moves the starting coordinats to new location
         strokeWeight(9);
         stroke(255, 10, 10); // red color
-        pixsDistance = iDistance * ((height - height * 0.1666f) * 0.025f); // covers the distance from the sensor from cm to pixels
+        pixsDistance = distance * ((height - height * 0.1666f) * 0.025f); // covers the distance from the sensor from cm to pixels
         // limiting the range to 40 cms
-        if(iDistance < 40) line(pixsDistance * cos(radians(iAngle)), -pixsDistance * sin(radians(iAngle)), (width - width * 0.505f) * cos(radians(iAngle)), -(width - width * 0.505f) * sin(radians(iAngle))); // draws the object according to the angle and the distance
+        if(distance < 40) line(pixsDistance * cos(radians(angle)), -pixsDistance * sin(radians(angle)), (width - width * 0.505f) * cos(radians(angle)), -(width - width * 0.505f) * sin(radians(angle))); // draws the object according to the angle and the distance
         popMatrix();
     }
 
@@ -91,14 +78,14 @@ public class Sketch extends PApplet {
         strokeWeight(9);
         stroke(30, 144, 255);
         translate(width/2, height - height * 0.074f); // moves the starting coordinats to new location
-        line(0, 0, (height - height * 0.12f) * cos(radians(iAngle)), -(height - height * 0.12f) * sin(radians(iAngle))); // draws the line according to the angle
+        line(0, 0, (height - height * 0.12f) * cos(radians(angle)), -(height - height * 0.12f) * sin(radians(angle))); // draws the line according to the angle
         popMatrix();
     }
 
     void drawText() { // draws the texts on the screen
         pushMatrix();
 
-        if(iDistance > 40) noObject = "Out of Range";
+        if(distance > 40) noObject = "Out of Range";
         else noObject = "In Range";
 
         fill(0, 0, 0);
@@ -113,9 +100,9 @@ public class Sketch extends PApplet {
         text("40cm", width - width * 0.0729f, height - height * 0.0833f);
         textSize(40);
         text("Object: " + noObject, width - width * 0.875f, height - height * 0.0277f);
-        text("Angle: " + iAngle +" °", width - width * 0.48f, height - height * 0.0277f);
+        text("Angle: " + angle +" °", width - width * 0.48f, height - height * 0.0277f);
         text("Distance: ", width - width * 0.26f, height - height * 0.0277f);
-        if(iDistance < 40) text("        " + iDistance +" cm", width - width * 0.225f, height - height * 0.0277f);
+        if(distance < 40) text("        " + distance +" cm", width - width * 0.225f, height - height * 0.0277f);
         textSize(25);
         fill(65, 105, 225);
         translate((width - width * 0.4994f) + width/2 * cos(radians(30)), (height - height * 0.0907f) - width/2 * sin(radians(30)));

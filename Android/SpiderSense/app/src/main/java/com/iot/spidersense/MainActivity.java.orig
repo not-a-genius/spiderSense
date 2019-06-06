@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -59,9 +58,6 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.UUID;
 
 import processing.android.PFragment;
@@ -76,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
-    private Button changeThemeButton, telegramButton, startButton, stopButton;
+    private Button changeThemeButton, telegramButton, startButton, stopButton, drawButton;
     private TextView textview;
 
     private final static int REQUEST_ENABLE_BT = 1;
@@ -84,12 +80,18 @@ public class MainActivity extends AppCompatActivity {
 
     private String nucleoMAC = "C6:50:E7:03:82:BE";
     private final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+<<<<<<< HEAD
+
+    private final static UUID UUID_DISTANCE_CM = UUID.fromString(SampleGattAttributes.UUID_DISTANCE_CM);
+    private final static UUID UUID_ANGLE_DEGREES = UUID.fromString(SampleGattAttributes.UUID_ANGLE_DEGREES);
+
+=======
     private final static UUID UUID_BATTERY_MEASUREMENT = UUID.fromString(SampleGattAttributes.BATTERY_MEASUREMENT);
+>>>>>>> 350c6d96458b5331eca7b65c2886571eb60aeeb8
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
     private BluetoothGatt btGatt;
-    
     private int mConnectionState = STATE_DISCONNECTED;
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -136,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
         telegramButton = findViewById(R.id.telegramButton);
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
+        drawButton = findViewById(R.id.drawButton);
         textview = findViewById(R.id.deviceView);
         textview.setMovementMethod(new ScrollingMovementMethod());
 
@@ -370,23 +373,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
 
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
+        Log.i("[myble]",characteristic.getUuid().toString() );
+        if (UUID_DISTANCE_CM.equals(characteristic.getUuid())) {
+
+            int format = BluetoothGattCharacteristic.FORMAT_UINT8;
+            Log.d(TAG, "Heart rate format UINT8.");
+
             final int heartRate = characteristic.getIntValue(format, 1);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
+<<<<<<< HEAD
+            textview.append("Value: " + heartRate + "\n");
+            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+        }
+        else if (UUID_ANGLE_DEGREES.equals( characteristic.getUuid() )){
+            final Integer secondValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 2);
+            Log.d(TAG, String.format("Received second value: %d", secondValue!=null? secondValue : "NULL"));
+
+        } else {
+            Log.i("[myble]","Not recognized ble profile");
+=======
             textview.append("Value: "+heartRate+"\n");
         }
         else if (UUID_BATTERY_MEASUREMENT.equals(characteristic.getUuid())) {
@@ -397,16 +406,15 @@ public class MainActivity extends AppCompatActivity {
             textview.append("Value: "+battery+"\n");
         }
         else {
+>>>>>>> 350c6d96458b5331eca7b65c2886571eb60aeeb8
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
                 for(byte byteChar : data)
                     stringBuilder.append(String.format("%02X ", byteChar));
-
             }
         }
-
     }
 
 
