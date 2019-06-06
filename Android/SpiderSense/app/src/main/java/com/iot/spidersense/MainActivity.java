@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "GattCallback";
 
     private String nucleoMAC = "C6:50:E7:03:82:BE";
-    private final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-    private final static UUID UUID_BATTERY_MEASUREMENT = UUID.fromString(SampleGattAttributes.BATTERY_MEASUREMENT);
+    private final static UUID UUID_DISTANCE_MEASUREMENT = UUID.fromString(SampleGattAttributes.DISTANCE_MEASUREMENT);
+    private final static UUID UUID_ANGLE_MEASUREMENT = UUID.fromString(SampleGattAttributes.ANGLE_MEASUREMENT);
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
@@ -371,30 +371,23 @@ public class MainActivity extends AppCompatActivity {
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
-            final int heartRate = characteristic.getIntValue(format, 1);
-            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            textview.append("Value: "+heartRate+"\n");
-            sketch.setDistance( heartRate);
+        if (UUID_DISTANCE_MEASUREMENT.equals(characteristic.getUuid())) {
+            int format = BluetoothGattCharacteristic.FORMAT_UINT8;
+            Log.d(TAG, "Distance format UINT8.");
+            final int distance = characteristic.getIntValue(format, 0);
+            Log.d(TAG, "Received angle: "+distance);
+            textview.append("Value: "+distance+"\n");
+            sketch.setDistance(distance);
 
 
         }
-        else if (UUID_BATTERY_MEASUREMENT.equals(characteristic.getUuid())) {
+        else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
-            Log.d(TAG, "Battery format UINT8.");
-            final int battery = characteristic.getIntValue(format, 0);
-            Log.d(TAG, String.format("Received battery: %d", battery));
-            textview.append("Value: "+battery+"\n");
-            sketch.setAngle(battery);
+            Log.d(TAG, "Angle format UINT8.");
+            final int angle = characteristic.getIntValue(format, 0);
+            Log.d(TAG, "Received angle: "+angle);
+            textview.append("Value: "+angle+"\n");
+            sketch.setAngle(angle);
         }
         else {
             // For all other profiles, writes the data formatted in HEX.
