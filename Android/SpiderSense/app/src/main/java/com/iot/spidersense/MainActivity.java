@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -48,9 +47,6 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.UUID;
 
 import processing.android.PFragment;
@@ -73,15 +69,11 @@ public class MainActivity extends AppCompatActivity {
 
     private String nucleoMAC = "C6:50:E7:03:82:BE";
     private final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+    private final static UUID UUID_BATTERY_MEASUREMENT = UUID.fromString(SampleGattAttributes.BATTERY_MEASUREMENT);
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
     private BluetoothGatt btGatt;
-    private BluetoothGattCharacteristic heartRateCharacteristic;
-    private BluetoothDevice nucleo;
-    private BluetoothGatt gatt;
-    private BluetoothGattCharacteristic tx;
-    private BluetoothGattCharacteristic rx;
     private int mConnectionState = STATE_DISCONNECTED;
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -194,7 +186,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 startButton.setVisibility(View.VISIBLE);
                 stopButton.setVisibility(View.GONE);
-                btGatt.disconnect();
+                if(btGatt != null) {
+                    btGatt.disconnect();
+                    btGatt.close();
+                    btGatt = null;
+                }
             }
         });
 
@@ -314,11 +310,14 @@ public class MainActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-                for(BluetoothGattService service : gatt.getServices())
-                    for(BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                for(BluetoothGattService service : gatt.getServices()) {
+                    Log.d(TAG, "Service: " + service.getUuid());
+                    for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                        Log.d(TAG, "Characteristic: " + characteristic.getUuid());
                         gatt.setCharacteristicNotification(characteristic, true);
                         gatt.readCharacteristic(characteristic);
                     }
+                }
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
@@ -360,7 +359,15 @@ public class MainActivity extends AppCompatActivity {
             final int heartRate = characteristic.getIntValue(format, 1);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
             textview.append("Value: "+heartRate+"\n");
-        } else {
+        }
+        else if (UUID_BATTERY_MEASUREMENT.equals(characteristic.getUuid())) {
+            int format = BluetoothGattCharacteristic.FORMAT_UINT8;
+            Log.d(TAG, "Battery format UINT8.");
+            final int battery = characteristic.getIntValue(format, 0);
+            Log.d(TAG, String.format("Received battery: %d", battery));
+            textview.append("Value: "+battery+"\n");
+        }
+        else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
