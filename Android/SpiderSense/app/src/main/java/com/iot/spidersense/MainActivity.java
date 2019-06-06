@@ -73,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
 
     private String nucleoMAC = "C6:50:E7:03:82:BE";
     private final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+
+    private final static UUID UUID_DISTANCE_CM = UUID.fromString(SampleGattAttributes.UUID_DISTANCE_CM);
+    private final static UUID UUID_ANGLE_DEGREES = UUID.fromString(SampleGattAttributes.UUID_ANGLE_DEGREES);
+
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
@@ -348,21 +352,23 @@ public class MainActivity extends AppCompatActivity {
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
+        Log.i("[myble]",characteristic.getUuid().toString() );
+        if (UUID_DISTANCE_CM.equals(characteristic.getUuid())) {
+
+            int format = BluetoothGattCharacteristic.FORMAT_UINT8;
+            Log.d(TAG, "Heart rate format UINT8.");
+
             final int heartRate = characteristic.getIntValue(format, 1);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            textview.append("Value: "+heartRate+"\n");
+            textview.append("Value: " + heartRate + "\n");
             intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+        }
+        else if (UUID_ANGLE_DEGREES.equals( characteristic.getUuid() )){
+            final Integer secondValue = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 2);
+            Log.d(TAG, String.format("Received second value: %d", secondValue!=null? secondValue : "NULL"));
+
         } else {
+            Log.i("[myble]","Not recognized ble profile");
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
