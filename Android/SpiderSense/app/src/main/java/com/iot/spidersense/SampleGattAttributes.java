@@ -7,6 +7,8 @@ public class SampleGattAttributes {
     public static String DISTANCE_MEASUREMENT = "00009a99-0000-1000-8000-00805f9b34fb";
     public static String ANGLE_MEASUREMENT = "00009a90-0000-1000-8000-00805f9b34fb";
 
+
+    
     static {
         // Sample Services.
         attributes.put("0000990d-0000-1000-8000-00805f9b34fb", "Distance Service");

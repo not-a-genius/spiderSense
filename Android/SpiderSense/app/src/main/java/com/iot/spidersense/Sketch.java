@@ -34,6 +34,7 @@ public class Sketch extends PApplet {
 
     public void setScreenMode(String screenMode) {
         this.screenMode = screenMode;
+        settings();
     }
 
     public void settings() {

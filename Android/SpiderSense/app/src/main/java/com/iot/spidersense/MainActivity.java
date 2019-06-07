@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -23,12 +22,12 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
@@ -59,13 +58,9 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.UUID;
 
 import processing.android.PFragment;
-import processing.core.PApplet;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private int theme;
     private Button changeThemeButton, telegramButton, startButton, stopButton;
     private TextView textview;
+    private BottomNavigationView bottomNavigationView;
+    private android.support.v7.app.ActionBar actionbar;
 
     private final static int REQUEST_ENABLE_BT = 1;
     private final String TAG = "GattCallback";
@@ -89,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
     private BluetoothGatt btGatt;
-    
+
     private int mConnectionState = STATE_DISCONNECTED;
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -106,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
     private final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
 
+
+    private int numOfPresence=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,15 +118,9 @@ public class MainActivity extends AppCompatActivity {
         // Set this Activity's theme to the saved theme
         setTheme(theme);
 
-        android.support.v7.app.ActionBar actionbar = getSupportActionBar();
+        actionbar = getSupportActionBar();
         actionbar.setDisplayShowHomeEnabled(true);
         actionbar.setIcon(R.drawable.ic_spider);
-
-        int display_mode = getResources().getConfiguration().orientation;
-        if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            actionbar.hide();
-        }
 
         setContentView(R.layout.activity_main);
 
@@ -168,26 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
         telegramButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
-                RequestQueue ExampleRequestQueue = Volley.newRequestQueue(activity);
-                StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        //This code is executed if the server responds, whether or not the response contains data.
-                        //The String 'response' contains the server's response.
-                        //You can test it by printing response.substring(0,500) to the screen.
-                        //Log.i(, "Get request performed");
-                    }
-                }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //This code is executed if there is an error.
-                    }
-                });
-
-                ExampleRequestQueue.add(ExampleStringRequest);
-
-                Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
+                sendToTelegram();
             }
         });
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -211,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Navbar
-        BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
+        bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener
                 (new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -261,17 +236,33 @@ public class MainActivity extends AppCompatActivity {
 
         //Processing
         sketch = new Sketch();
-        if (display_mode == Configuration.ORIENTATION_LANDSCAPE) {
-            bottomNavigationView.setVisibility(View.GONE);
-            sketch.setScreenMode("fullscreen");
-        }
-        else {
-            bottomNavigationView.setVisibility(View.VISIBLE);
-            sketch.setScreenMode("normal");
-        }
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            actionbar.hide();
+            bottomNavigationView.setVisibility(View.GONE);
+            sketch.setScreenMode("fullscreen");
+
+        }
+        else {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+
+            actionbar.show();
+            bottomNavigationView.setVisibility(View.VISIBLE);
+            sketch.setScreenMode("normal");
+        }
+
+    }
+
+
+
 
     // Device scan callback.
     private ScanCallback leScanCallback = new ScanCallback() {
@@ -375,10 +366,11 @@ public class MainActivity extends AppCompatActivity {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Distance format UINT8.");
             final int distance = characteristic.getIntValue(format, 0);
-            Log.d(TAG, "Received angle: "+distance);
+            Log.d(TAG, "Received distance: "+ distance);
             textview.append("Value: "+distance+"\n");
-            sketch.setDistance(distance);
-
+            sketch.setDistance( distance);
+            if(distance < 40)
+                numOfPresence++;  //one detection more to count
 
         }
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
@@ -388,8 +380,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Received angle: "+angle);
             textview.append("Value: "+angle+"\n");
             sketch.setAngle(angle);
+
+            if(angle==0 || angle==165)
+                numOfPresence=0;    //reset counter of detection
         }
         else {
+            Log.d(TAG,"Profile not recognized");
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
@@ -450,9 +446,38 @@ public class MainActivity extends AppCompatActivity {
             sketch.onNewIntent(intent);
         }
     }
-    private void updateSketch(Sketch sketch,int distance, int angle) {
-        sketch.setDistance(distance);
-        sketch.setAngle(angle);
+
+    //return true if a threat is detected
+    private boolean checkThreat(){
+        if(numOfPresence > 20) {
+            sendToTelegram();
+            numOfPresence=0;
+            return true;
+        }
+        return false;
+    }
+
+    private void sendToTelegram(){
+        String url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+        RequestQueue ExampleRequestQueue = Volley.newRequestQueue(activity);
+        StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //This code is executed if the server responds, whether or not the response contains data.
+                //The String 'response' contains the server's response.
+                //You can test it by printing response.substring(0,500) to the screen.
+                //Log.i(, "Get request performed");
+            }
+        }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //This code is executed if there is an error.
+            }
+        });
+
+        ExampleRequestQueue.add(ExampleStringRequest);
+
+        Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
     }
 
     public void enableGPS() {
