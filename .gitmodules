@@ -1,0 +1,3 @@
+[submodule "spider-sence-bot"]
+	path = spider-sence-bot
+	url = git@github.com:Artem723/spider-sence-bot.git
