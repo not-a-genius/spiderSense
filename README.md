@@ -41,11 +41,17 @@ public class Constant {
 ### Run your android app
 
 ## Usage
-### Set Nucleo board
+### Set the Nucleo board
 
-First thing to do is to compile on Mbed ([online compiler](https://ide.mbed.com/compiler/)) code for nucleo board you can find in folder:()
+First thing to do is to compile on [Mbed online compiler](https://ide.mbed.com/compiler/) or an offline version the code for nucleo board you can find in folder:().
+
+Then you will have a .bin file ready to be copied and pasted in the folder of Nucleo board after you have mounted the usb drive.
+
+As soon as you gain power to the board the code will be executed.
 
 ### Set Android App
+
+On android studio you have to open the folder of the project you can find here:
 
 
 ## Future Features
@@ -56,9 +62,10 @@ Features to be implemented:
 ## Credits:
 - Giuseppe Capaldi [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/not-a-genius)
 					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](https://www.linkedin.com/in/giuseppe-capaldi-56688a171/)
-- Marco Costa [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/marcocosta96)
-					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](www.linkedin.com/in/marco-costa-ecs)
-- Artem Savchuck
+- Marco Costa [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/marcocosta96/)
+					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](https://www.linkedin.com/in/marco-costa-ecs)
+- Artem Savchuck [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/Artem723)
+ 					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](https://www.linkedin.com/in/artem-savchuk-7278a7170/)
 
 
 ## License:
