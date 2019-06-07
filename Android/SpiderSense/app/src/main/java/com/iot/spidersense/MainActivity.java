@@ -19,7 +19,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +30,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -454,7 +458,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendToTelegram(){
-        String url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+        String url = "";
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            double latitude = 0, longitude = 0;
+            LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
+                    500.0f, locationListener);
+            Location location = locManager
+                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&lat=" + latitude + "&lon=" + longitude;
+            }
+            else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+        }
+        else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
         RequestQueue ExampleRequestQueue = Volley.newRequestQueue(activity);
         StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -475,6 +495,29 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
     }
+
+    private void updateWithNewLocation(Location location) {
+        if (location != null) {
+            double lat = location.getLatitude();
+            double lng = location.getLongitude();
+        } else {
+        }
+    }
+
+    private final LocationListener locationListener = new LocationListener() {
+
+        public void onLocationChanged(Location location) {
+            updateWithNewLocation(location);
+        }
+
+        public void onProviderDisabled(String provider) {
+            updateWithNewLocation(null);
+        }
+
+        public void onProviderEnabled(String provider) {}
+
+        public void onStatusChanged(String provider,int status,Bundle extras){}
+    };
 
     public void enableGPS() {
         LocationRequest locationRequest = LocationRequest.create();
