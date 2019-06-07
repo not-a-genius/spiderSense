@@ -7,7 +7,7 @@ Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadca
 
 ## Description
 
-This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. Our idea was to use it along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle) and then visualize real-time data on a smartphone homemade app using BLE connection to pass data. Finally we broadcast a message with location of device to other smartphones through Telegram APIs.  
+This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. Our idea was to use it along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle) and then visualize real-time data on a smartphone homemade app using BLE connection to pass data. Finally we broadcast a message with location of device to other smartphones through Telegram APIs.
 <!--
 This is an Android app project based on Sensoro™ Beacons (....
 1
@@ -15,7 +15,7 @@ This is an Android app project based on Sensoro™ Beacons (....
 -->
 
 ## Installation
-s
+
 <!--
 ```java
 //Constant.java
@@ -41,7 +41,11 @@ public class Constant {
 ### Run your android app
 
 ## Usage
-First thing to do is to connect the smartphone to Android
+### Set Nucleo board
+
+First thing to do is to compile on Mbed ([online compiler](https://ide.mbed.com/compiler/)) code for nucleo board you can find in folder:()
+
+### Set Android App
 
 
 ## Future Features
@@ -52,8 +56,8 @@ Features to be implemented:
 ## Credits:
 - Giuseppe Capaldi [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/not-a-genius)
 					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](https://www.linkedin.com/in/giuseppe-capaldi-56688a171/)
-
-- Marco Costa
+- Marco Costa [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/marcocosta96)
+					[<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/inIcon.png" height="20" width="20" >](www.linkedin.com/in/marco-costa-ecs)
 - Artem Savchuck
 
 
