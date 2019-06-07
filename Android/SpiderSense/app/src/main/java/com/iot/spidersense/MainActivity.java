@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
     private Button changeThemeButton, telegramButton, startButton, stopButton;
-    private TextView textview;
+    private TextView textview, timerView;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
     private boolean sentAlert = false;
@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
     private int numOfPresence=0;
     private LocationManager mLocationManager;
     private Handler timeHandler;
+    private Handler timer;
+    private int time = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
         textview = findViewById(R.id.deviceView);
-        textview.setMovementMethod(new ScrollingMovementMethod());
+        timerView = findViewById(R.id.timer);
 
         //Set function change theme to button
         changeThemeButton.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 telegramButton.setEnabled(false);
                 telegramButton.refreshDrawableState();
                 timeHandler.removeCallbacks(timeRunnable);
+                timer.removeCallbacks(timerRunnable);
+                timerView.setText("10s");
+                time = 10;
                 numOfPresence = 0;
             }
         });
@@ -184,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 startButton.setVisibility(View.VISIBLE);
                 stopButton.setVisibility(View.GONE);
+                textview.setText("");
                 if(btGatt != null) {
                     btGatt.disconnect();
                     btGatt.close();
@@ -247,12 +253,22 @@ public class MainActivity extends AppCompatActivity {
         fragment.setView(radarContainer, this);
 
         timeHandler = new Handler(Looper.getMainLooper());
+        timer = new Handler(Looper.getMainLooper());
     }
 
     private Runnable timeRunnable = new Runnable() {
         @Override
         public void run() {
             sendToTelegram();
+        }
+    };
+
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            time--;
+            timerView.setText(time+"s");
+            if(time != 0) timer.postDelayed(timerRunnable, 1000);
         }
     };
 
@@ -375,7 +391,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Distance format UINT8.");
             final int distance = characteristic.getIntValue(format, 0);
             Log.d(TAG, "Received distance: "+ distance);
-            textview.append("Value: "+distance+"\n");
             sketch.setDistance( distance);
             if(distance < 40)
                 numOfPresence++;  //one detection more to count
@@ -387,7 +402,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Angle format UINT8.");
             final int angle = characteristic.getIntValue(format, 0);
             Log.d(TAG, "Received angle: "+angle);
-            textview.append("Value: "+angle+"\n");
             sketch.setAngle(angle);
 
             if(angle==0 || angle==165) {
@@ -466,6 +480,7 @@ public class MainActivity extends AppCompatActivity {
             if(! sentAlert) {
                 Log.d("[telegram]","Sending to telegram");
                 timeHandler.postDelayed(timeRunnable, 5000);
+                timer.postDelayed(timerRunnable, 1000);
                 //Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
                 sentAlert = true;
             }

@@ -29,27 +29,47 @@
         android:visibility="gone"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/changeThemeString"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/change_theme_text"
-            android:textSize="20sp"/>
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/changeThemeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/change_theme_button"
-            android:textSize="20sp"/>
+            <TextView
+                android:id="@+id/changeThemeString"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/change_theme_text"
+                android:paddingEnd="20px"
+                android:textSize="20sp"/>
 
-        <Button
-            android:id="@+id/telegramButton"
+            <Button
+                android:id="@+id/changeThemeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/change_theme_button"
+                android:textSize="20sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop alert"
-            android:enabled="false"
-            android:textSize="20sp"/>
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/telegramButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop alert"
+                android:enabled="false"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/timer"
+                android:paddingStart="20px"
+                android:text="10 s"/>
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/startButton"
