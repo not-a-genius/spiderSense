@@ -47,7 +47,8 @@
             android:id="@+id/telegramButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Try telegram bot"
+            android:text="Stop alert"
+            android:enabled="false"
             android:textSize="20sp"/>
 
         <Button

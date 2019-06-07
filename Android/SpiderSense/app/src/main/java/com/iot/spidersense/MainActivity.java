@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textview;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
+    private boolean sentAlert = false, alerting = false;
 
     private final static int REQUEST_ENABLE_BT = 1;
     private final String TAG = "GattCallback";
@@ -162,7 +163,9 @@ public class MainActivity extends AppCompatActivity {
 
         telegramButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                sendToTelegram();
+                telegramButton.setEnabled(false);
+                telegramButton.refreshDrawableState();
+                numOfPresence = 0;
             }
         });
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -248,15 +251,18 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
             actionbar.hide();
             bottomNavigationView.setVisibility(View.GONE);
-            sketch.setScreenMode("fullscreen");
+            sketch= new Sketch("fullscreen");
+            PFragment fragment = new PFragment(sketch);
+            fragment.setView(radarContainer, this);
 
         }
         else {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
-
+            getWindow().setFlags(WindowManager.LayoutParams.ALPHA_CHANGED, WindowManager.LayoutParams.ALPHA_CHANGED);
             actionbar.show();
             bottomNavigationView.setVisibility(View.VISIBLE);
-            sketch.setScreenMode("normal");
+            sketch= new Sketch();
+            PFragment fragment = new PFragment(sketch);
+            fragment.setView(radarContainer, this);
         }
 
     }
@@ -285,17 +291,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if(btScanner == null) btScanner = btAdapter.getBluetoothLeScanner();
                 btScanner.startScan(leScanCallback);
-            }
-        });
-    }
-
-    public void stopScanning() {
-        System.out.println("stopping scanning");
-        textview.append("Stopped Scanning");
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                btScanner.stopScan(leScanCallback);
             }
         });
     }
@@ -371,7 +366,8 @@ public class MainActivity extends AppCompatActivity {
             sketch.setDistance( distance);
             if(distance < 40)
                 numOfPresence++;  //one detection more to count
-
+            Log.i("numOfPresence", ""+numOfPresence);
+            if(!alerting) checkThreat();
         }
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
@@ -448,13 +444,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //return true if a threat is detected
-    private boolean checkThreat(){
+    private void checkThreat(){
         if(numOfPresence > 20) {
+            telegramButton.setEnabled(true);
+            telegramButton.refreshDrawableState();
             sendToTelegram();
-            numOfPresence=0;
-            return true;
+            Toast.makeText(this,"Press button to stop alertt.", Toast.LENGTH_SHORT).show();
         }
-        return false;
     }
 
     private void sendToTelegram(){

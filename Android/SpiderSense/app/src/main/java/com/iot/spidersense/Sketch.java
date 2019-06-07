@@ -22,6 +22,9 @@ public class Sketch extends PApplet {
     public Sketch(){
 
     }
+    public Sketch(String mode){
+        this.screenMode=mode;
+    }
 
 
     public void setAngle(int angle) {
