@@ -27,6 +27,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textview;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
-    private boolean sentAlert = false, alerting = false;
+    private boolean sentAlert = false;
 
     private final static int REQUEST_ENABLE_BT = 1;
     private final String TAG = "GattCallback";
@@ -371,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
             if(distance < 40)
                 numOfPresence++;  //one detection more to count
             Log.i("numOfPresence", ""+numOfPresence);
-            if(!alerting) checkThreat();
+            checkThreat();
         }
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
@@ -381,8 +382,10 @@ public class MainActivity extends AppCompatActivity {
             textview.append("Value: "+angle+"\n");
             sketch.setAngle(angle);
 
-            if(angle==0 || angle==165)
-                numOfPresence=0;    //reset counter of detection
+            if(angle==0 || angle==165) {
+                numOfPresence = 0;    //reset counter of detection
+                sentAlert = false;
+            }
         }
         else {
             Log.d(TAG,"Profile not recognized");
@@ -452,8 +455,13 @@ public class MainActivity extends AppCompatActivity {
         if(numOfPresence > 20) {
             telegramButton.setEnabled(true);
             telegramButton.refreshDrawableState();
-            sendToTelegram();
-            Toast.makeText(this,"Press button to stop alertt.", Toast.LENGTH_SHORT).show();
+            if(! sentAlert) {
+                Log.d("[telegram]","Sending to telegram");
+                sendToTelegram();
+                //Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
+                sentAlert = true;
+            }
+//            Toast.makeText(this,"Press button to stop alertt.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -464,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
             double latitude = 0, longitude = 0;
             LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
             locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
-                    500.0f, locationListener);
+                    500.0f, locationListener, Looper.getMainLooper());
             Location location = locManager
                     .getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location != null) {
@@ -492,8 +500,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ExampleRequestQueue.add(ExampleStringRequest);
-
-        Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
     }
 
     private void updateWithNewLocation(Location location) {
