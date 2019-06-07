@@ -99,20 +99,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
-    private final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    private final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    private final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    private final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    private final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+    private final static String ACTION_GATT_CONNECTED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_CONNECTED";
+    private final static String ACTION_GATT_DISCONNECTED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    private final static String ACTION_GATT_SERVICES_DISCOVERED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    private final static String ACTION_DATA_AVAILABLE = "com.iot.spidersense.bluetooth.le.ACTION_DATA_AVAILABLE";
+    private final static String EXTRA_DATA = "com.iot.spidersense.bluetooth.le.EXTRA_DATA";
 
 
     private int numOfPresence=0;
-    private LocationManager locManager, mLocationManager;
+    private LocationManager mLocationManager;
+    private Handler timeHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 telegramButton.setEnabled(false);
                 telegramButton.refreshDrawableState();
+                timeHandler.removeCallbacks(timeRunnable);
                 numOfPresence = 0;
             }
         });
@@ -248,14 +245,16 @@ public class MainActivity extends AppCompatActivity {
         sketch = new Sketch();
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
-/*
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
-                    500.0f, locationListener, Looper.getMainLooper());
-        }*/
+
+        timeHandler = new Handler(Looper.getMainLooper());
     }
+
+    private Runnable timeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            sendToTelegram();
+        }
+    };
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -466,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
             telegramButton.refreshDrawableState();
             if(! sentAlert) {
                 Log.d("[telegram]","Sending to telegram");
-                sendToTelegram();
+                timeHandler.postDelayed(timeRunnable, 5000);
                 //Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
                 sentAlert = true;
             }
