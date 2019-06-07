@@ -19,6 +19,7 @@ const static char     DEVICE_NAME[]        = "SpiderSense";
 static const uint16_t uuid16_list[]        = {UUID_DISTANCE_SERVICE, UUID_ANGLE_SERVICE};
 
 static volatile bool  triggerSensorPolling = false;
+static bool increment = true;
 
 //Define Serial object
 Serial pc(USBTX, USBRX);
@@ -77,7 +78,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
     uint8_t distance = 60; // init HRM to 60bps
     DistanceService distanceService(ble, distance);
     
-    uint8_t angle = 50;
+    uint8_t angle = 15;
     AngleService angleService(ble, angle);
 
     /* Setup advertising. */
@@ -88,37 +89,19 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
     ble.gap().setAdvertisingType(GapAdvertisingParams::ADV_CONNECTABLE_UNDIRECTED);
     ble.gap().setAdvertisingInterval(50); /* 1000ms */
     ble.gap().startAdvertising();
+    
+    myServo.Enable(1500,20000);
 
     // infinite loop
     while (true) {
         // check for trigger from periodicCallback()
-        if (ble.getGapState().connected) {
-
+        if (triggerSensorPolling && ble.getGapState().connected) {
+            triggerSensorPolling = false;
             // Do blocking calls or whatever is necessary for sensor polling.
             // In our case, we simply update the HRM measurement.
             // rotates the servo motor from 15 to 165 degrees
-            for(int i=15; i<=165; i++) {
-                myServo.SetPosition(500 + (i * 12.1212));
+                myServo.SetPosition(500 + (angle * 12.1212));
                 distance = calculateDistance();
-                angle = i;
-                if(distance < 20) {
-                    greenLED = LOW ;
-                    redLED = HIGH;
-                } else {
-                    redLED = LOW ;
-                    greenLED = HIGH ;
-                }
-                // update bps
-                distanceService.updateDistanceValue(distance);
-                angleService.updateAngleValue(angle);
-                wait_ms(100);
-            }
-
-        // Repeats the previous lines from 165 to 15 degrees
-            for(int i=165; i>15; i--) {
-                myServo.SetPosition(500 + (i * 12.1212));
-                distance = calculateDistance();
-                angle = i;
                 if(distance < 20) {
                     greenLED = LOW ;
                     redLED = HIGH;
@@ -128,12 +111,10 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
                 }
                 distanceService.updateDistanceValue(distance);
                 angleService.updateAngleValue(angle);
-                wait_ms(100);
-            }
-            
-
-            
-
+                if(increment) angle++;
+                else angle--;
+                if(angle == 15) increment = true;
+                else if(angle == 165) increment = false;
         } else {
             ble.waitForEvent(); // low power wait for event
         }
@@ -141,9 +122,8 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
 }
 
 int main(void) {
-    myServo.Enable(1500,20000);
     Ticker ticker;
-    ticker.attach(periodicCallback, 1); // blink LED every second
+    ticker.attach(periodicCallback, 0.2); // blink LED every second
 
     BLE::Instance().init(bleInitComplete);
 }
