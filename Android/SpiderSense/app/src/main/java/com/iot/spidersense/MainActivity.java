@@ -17,12 +17,10 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,7 +31,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,20 +47,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.util.List;
 import java.util.UUID;
 
 import processing.android.PFragment;
@@ -77,40 +64,28 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
-    private Button changeThemeButton, telegramButton, startButton, stopButton;
+    private Button changeThemeButton, stopAlertButton, connectButton, disconnectButton;
     private TextView textview, timerView;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
-    private boolean sentAlert = false;
 
+    // BLE
     private final static int REQUEST_ENABLE_BT = 1;
     private final String TAG = "GattCallback";
-
     private String nucleoMAC = "C6:50:E7:03:82:BE";
-    private final static UUID UUID_DISTANCE_MEASUREMENT = UUID.fromString(SampleGattAttributes.DISTANCE_MEASUREMENT);
-    private final static UUID UUID_ANGLE_MEASUREMENT = UUID.fromString(SampleGattAttributes.ANGLE_MEASUREMENT);
+    private final static UUID UUID_DISTANCE_MEASUREMENT = UUID.fromString(GattAttributes.DISTANCE_MEASUREMENT);
+    private final static UUID UUID_ANGLE_MEASUREMENT = UUID.fromString(GattAttributes.ANGLE_MEASUREMENT);
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothLeScanner btScanner;
     private BluetoothGatt btGatt;
 
-    private int mConnectionState = STATE_DISCONNECTED;
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
-
-    private final static String ACTION_GATT_CONNECTED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_CONNECTED";
-    private final static String ACTION_GATT_DISCONNECTED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    private final static String ACTION_GATT_SERVICES_DISCOVERED = "com.iot.spidersense.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    private final static String ACTION_DATA_AVAILABLE = "com.iot.spidersense.bluetooth.le.ACTION_DATA_AVAILABLE";
-    private final static String EXTRA_DATA = "com.iot.spidersense.bluetooth.le.EXTRA_DATA";
-
-
-    private int numOfPresence=0;
-    private LocationManager mLocationManager;
-    private Handler timeHandler;
-    private Handler timer;
-    private int time = 10;
+    // Alert
+    private int numOfPresence = 0;
+    private boolean sentAlert = false;
+    private LocationManager locationManager;
+    private Handler alertHandler, timerHandler;
+    private int countdownTimer = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,108 +108,35 @@ public class MainActivity extends AppCompatActivity {
         radarContainer = findViewById(R.id.radar_container);
         settings = findViewById(R.id.settings);
         changeThemeButton = findViewById(R.id.changeThemeButton);
-        telegramButton = findViewById(R.id.telegramButton);
-        startButton = findViewById(R.id.startButton);
-        stopButton = findViewById(R.id.stopButton);
+        stopAlertButton = findViewById(R.id.stopAlertButton);
+        connectButton = findViewById(R.id.connectButton);
+        disconnectButton = findViewById(R.id.disconnectButton);
         textview = findViewById(R.id.deviceView);
         timerView = findViewById(R.id.timer);
 
-        //Set function change theme to button
-        changeThemeButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if(theme == R.style.AppTheme) preferenceManager.edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
-                else preferenceManager.edit().putInt("ActivityTheme", R.style.AppTheme).commit();
-
-                // setup the alert builder
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle("AlertDialog");
-                builder.setMessage("It's necessary to restart the app for changing the theme!");
-
-                // add the buttons
-                builder.setPositiveButton("Restart now", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        activity.recreate();
-                        Toast.makeText(activity, "Theme switched to " + ((theme == R.style.AppTheme) ? "dark" : "light"), Toast.LENGTH_SHORT).show();
-                    }
-                });
-                builder.setNegativeButton("Restart later", null);
-
-                // create and show the alert dialog
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
-
-        telegramButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                telegramButton.setEnabled(false);
-                telegramButton.refreshDrawableState();
-                timeHandler.removeCallbacks(timeRunnable);
-                timer.removeCallbacks(timerRunnable);
-                timerView.setText("10s");
-                time = 10;
-                numOfPresence = 0;
-            }
-        });
-        startButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startScanning();
-                startButton.setVisibility(View.GONE);
-                stopButton.setVisibility(View.VISIBLE);
-            }
-        });
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startButton.setVisibility(View.VISIBLE);
-                stopButton.setVisibility(View.GONE);
-                textview.setText("");
-                if(btGatt != null) {
-                    btGatt.disconnect();
-                    btGatt.close();
-                    btGatt = null;
-                }
-            }
-        });
+        //Set listeners to buttons
+        changeThemeButton.setOnClickListener(changeThemeListener);
+        stopAlertButton.setOnClickListener(stopAlertListener);
+        connectButton.setOnClickListener(connectListener);
+        disconnectButton.setOnClickListener(disconnectListener);
 
         //Navbar
         bottomNavigationView = findViewById(R.id.navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener
-                (new BottomNavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.action_home:
-                                radarContainer.setVisibility(View.VISIBLE);
-                                settings.setVisibility(View.GONE);
-                                break;
-                            case R.id.action_settings:
-                                radarContainer.setVisibility(View.GONE);
-                                settings.setVisibility(View.VISIBLE);
-                                break;
-                        }
-                        return true;
-                    }
-                });
+        bottomNavigationView.setOnNavigationItemSelectedListener(navbarListener);
 
-        //Request permission
-        PermissionListener dialogPermissionListener =
-                DialogOnDeniedPermissionListener.Builder
+        //Request location permission
+        PermissionListener dialogPermissionListener = DialogOnDeniedPermissionListener.Builder
                         .withContext(this.getApplicationContext())
                         .withTitle("Location permission")
                         .withMessage("Location permission is needed to use bluetooth!")
                         .withButtonText(android.R.string.ok)
                         .withIcon(R.drawable.ic_location)
                         .build();
-        Dexter.withActivity(this)
-                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(dialogPermissionListener).check();
+        Dexter.withActivity(this).withPermission(Manifest.permission.ACCESS_FINE_LOCATION).withListener(dialogPermissionListener).check();
 
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         btScanner = btAdapter.getBluetoothLeScanner();
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         //Enable bluetooth
         if (btAdapter != null && !btAdapter.isEnabled()) {
@@ -243,8 +145,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Enable gps
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            enableGPS();
+            MyLocation.enableGPS(activity);
         }
 
         //Processing
@@ -252,25 +155,9 @@ public class MainActivity extends AppCompatActivity {
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
 
-        timeHandler = new Handler(Looper.getMainLooper());
-        timer = new Handler(Looper.getMainLooper());
+        alertHandler = new Handler(Looper.getMainLooper());
+        timerHandler = new Handler(Looper.getMainLooper());
     }
-
-    private Runnable timeRunnable = new Runnable() {
-        @Override
-        public void run() {
-            sendToTelegram();
-        }
-    };
-
-    private Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            time--;
-            timerView.setText(time+"s");
-            if(time != 0) timer.postDelayed(timerRunnable, 1000);
-        }
-    };
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -295,9 +182,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-
-
 
     // Device scan callback.
     private ScanCallback leScanCallback = new ScanCallback() {
@@ -330,25 +214,18 @@ public class MainActivity extends AppCompatActivity {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                intentAction = ACTION_GATT_CONNECTED;
-                mConnectionState = STATE_CONNECTED;
-                broadcastUpdate(intentAction);
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" + btGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = STATE_DISCONNECTED;
                 Log.i(TAG, "Disconnected from GATT server.");
-                broadcastUpdate(intentAction);
             }
         }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
                 for(BluetoothGattService service : gatt.getServices()) {
                     Log.d(TAG, "Service: " + service.getUuid());
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
@@ -365,27 +242,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+                receiveData(characteristic);
             }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
+            receiveData(characteristic);
         }
     };
 
-    private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
-        sendBroadcast(intent);
-    }
-
-    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
-
-        // This is special handling for the Heart Rate Measurement profile.  Data parsing is
-        // carried out as per profile specifications:
-        // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
+    private void receiveData(final BluetoothGattCharacteristic characteristic) {
         if (UUID_DISTANCE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Distance format UINT8.");
@@ -422,7 +289,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
     @Override
     public void onBackPressed() {
@@ -475,30 +341,26 @@ public class MainActivity extends AppCompatActivity {
     //return true if a threat is detected
     private void checkThreat(){
         if(numOfPresence > 20) {
-            telegramButton.setEnabled(true);
-            telegramButton.refreshDrawableState();
-            if(! sentAlert) {
+            stopAlertButton.setEnabled(true);
+            stopAlertButton.refreshDrawableState();
+            if(!sentAlert) {
                 Log.d("[telegram]","Sending to telegram");
-                timeHandler.postDelayed(timeRunnable, 5000);
-                timer.postDelayed(timerRunnable, 1000);
-                //Toast.makeText(activity, "Request done!", Toast.LENGTH_SHORT).show();
+                alertHandler.postDelayed(alertRunnable, countdownTimer * 1000);
+                timerHandler.postDelayed(timerRunnable, 1000);
                 sentAlert = true;
             }
-//            Toast.makeText(this,"Press button to stop alertt.", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void sendToTelegram(){
-        String url = "";
+        String url;
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             double latitude = 0, longitude = 0;
             LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
-                    500.0f, locationListener, Looper.getMainLooper());
-            Location myLocation = getLastKnownLocation();
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 500.0f, MyLocation.locationListener, Looper.getMainLooper());
+            Location myLocation = MyLocation.getLastKnownLocation(getApplicationContext());
             if (myLocation != null) {
-                Log.d("GPS", "location != null");
                 latitude = myLocation.getLatitude();
                 longitude = myLocation.getLongitude();
                 url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&lat=" + latitude + "&lon=" + longitude;
@@ -521,92 +383,102 @@ public class MainActivity extends AppCompatActivity {
                 //This code is executed if there is an error.
             }
         });
-
         ExampleRequestQueue.add(ExampleStringRequest);
     }
 
-    private Location getLastKnownLocation() {
-        mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            Location l = null;
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                l = mLocationManager.getLastKnownLocation(provider);
-            }
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
+    // Button listeners
+    private View.OnClickListener changeThemeListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            if(theme == R.style.AppTheme) preferenceManager.edit().putInt("ActivityTheme", R.style.AppThemeDark).commit();
+            else preferenceManager.edit().putInt("ActivityTheme", R.style.AppTheme).commit();
+
+            // setup the alert builder
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle("AlertDialog");
+            builder.setMessage("It's necessary to restart the app for changing the theme!");
+
+            // add the buttons
+            builder.setPositiveButton("Restart now", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    activity.recreate();
+                    Toast.makeText(activity, "Theme switched to " + ((theme == R.style.AppTheme) ? "dark" : "light"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            builder.setNegativeButton("Restart later", null);
+
+            // create and show the alert dialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
-        return bestLocation;
-    }
-
-    private void updateWithNewLocation(Location location) {
-        if (location != null) {
-            double lat = location.getLatitude();
-            double lng = location.getLongitude();
-        } else {
-        }
-    }
-
-    private final LocationListener locationListener = new LocationListener() {
-
-        public void onLocationChanged(Location location) {
-            updateWithNewLocation(location);
-        }
-
-        public void onProviderDisabled(String provider) {
-            updateWithNewLocation(null);
-        }
-
-        public void onProviderEnabled(String provider) {}
-
-        public void onStatusChanged(String provider,int status,Bundle extras){}
     };
 
-    public void enableGPS() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+    private View.OnClickListener stopAlertListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            stopAlertButton.setEnabled(false);
+            stopAlertButton.refreshDrawableState();
+            alertHandler.removeCallbacks(alertRunnable);
+            timerHandler.removeCallbacks(timerRunnable);
+            timerView.setText("10s");
+            countdownTimer = 10;
+            numOfPresence = 0;
+        }
+    };
 
-        Task<LocationSettingsResponse> result = LocationServices.getSettingsClient(MainActivity.this).checkLocationSettings(builder.build());
-        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
-                try {
-                    LocationSettingsResponse response = task.getResult(ApiException.class);
-                    // All location settings are satisfied. The client can initialize location
-                    // requests here.
-                } catch (ApiException exception) {
-                    switch (exception.getStatusCode()) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            // Location settings are not satisfied. But could be fixed by showing the
-                            // user a dialog.
-                            try {
-                                // Cast to a resolvable exception.
-                                ResolvableApiException resolvable = (ResolvableApiException) exception;
-                                // Show the dialog by calling startResolutionForResult(),
-                                // and check the result in onActivityResult().
-                                resolvable.startResolutionForResult(
-                                        MainActivity.this,
-                                        LocationRequest.PRIORITY_HIGH_ACCURACY);
-                            } catch (IntentSender.SendIntentException e) {
-                                // Ignore the error.
-                            } catch (ClassCastException e) {
-                                // Ignore, should be an impossible error.
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            // Location settings are not satisfied. However, we have no way to fix the
-                            // settings so we won't show the dialog.
-                            break;
-                    }
-                }
+    private View.OnClickListener connectListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            startScanning();
+            connectButton.setVisibility(View.GONE);
+            disconnectButton.setVisibility(View.VISIBLE);
+        }
+    };
+
+    private View.OnClickListener disconnectListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            connectButton.setVisibility(View.VISIBLE);
+            disconnectButton.setVisibility(View.GONE);
+            textview.setText("");
+            if(btGatt != null) {
+                btGatt.disconnect();
+                btGatt.close();
+                btGatt = null;
             }
-        });
-    }
+        }
+    };
+
+    // Navbar Listener
+    private BottomNavigationView.OnNavigationItemSelectedListener navbarListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_home:
+                    radarContainer.setVisibility(View.VISIBLE);
+                    settings.setVisibility(View.GONE);
+                    break;
+                case R.id.action_settings:
+                    radarContainer.setVisibility(View.GONE);
+                    settings.setVisibility(View.VISIBLE);
+                    break;
+            }
+            return true;
+        }
+    };
+
+    // Handler runnables
+    private Runnable alertRunnable = new Runnable() {
+        @Override
+        public void run() {
+            sendToTelegram();
+        }
+    };
+
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            countdownTimer--;
+            timerView.setText(countdownTimer + "s");
+            if(countdownTimer != 0) timerHandler.postDelayed(timerRunnable, 1000);
+        }
+    };
 }

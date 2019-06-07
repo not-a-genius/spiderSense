@@ -55,7 +55,7 @@
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/telegramButton"
+                android:id="@+id/stopAlertButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Stop alert"
@@ -72,14 +72,14 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/startButton"
+            android:id="@+id/connectButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Connect"
             android:textSize="20sp"/>
 
         <Button
-            android:id="@+id/stopButton"
+            android:id="@+id/disconnectButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Disconnect"
