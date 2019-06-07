@@ -63,6 +63,7 @@ import com.karumi.dexter.Dexter;
 import com.karumi.dexter.listener.single.DialogOnDeniedPermissionListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.util.List;
 import java.util.UUID;
 
 import processing.android.PFragment;
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private int numOfPresence=0;
+    private LocationManager locManager, mLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                         .withIcon(R.drawable.ic_location)
                         .build();
         Dexter.withActivity(this)
-                .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 .withListener(dialogPermissionListener).check();
 
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
@@ -246,6 +248,13 @@ public class MainActivity extends AppCompatActivity {
         sketch = new Sketch();
         PFragment fragment = new PFragment(sketch);
         fragment.setView(radarContainer, this);
+/*
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
+                    500.0f, locationListener, Looper.getMainLooper());
+        }*/
     }
 
     @Override
@@ -473,11 +482,11 @@ public class MainActivity extends AppCompatActivity {
             LocationManager locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
             locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L,
                     500.0f, locationListener, Looper.getMainLooper());
-            Location location = locManager
-                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (location != null) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+            Location myLocation = getLastKnownLocation();
+            if (myLocation != null) {
+                Log.d("GPS", "location != null");
+                latitude = myLocation.getLatitude();
+                longitude = myLocation.getLongitude();
                 url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&lat=" + latitude + "&lon=" + longitude;
             }
             else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
@@ -500,6 +509,26 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ExampleRequestQueue.add(ExampleStringRequest);
+    }
+
+    private Location getLastKnownLocation() {
+        mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = null;
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                l = mLocationManager.getLastKnownLocation(provider);
+            }
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
     }
 
     private void updateWithNewLocation(Location location) {
