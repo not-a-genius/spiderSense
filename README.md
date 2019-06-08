@@ -58,7 +58,7 @@ At the end our globlal system architecture is this:
 * [Android](https://developer.android.com/)
 * [MbedOs](https://www.mbed.com/en/platform/mbed-os/)
 * [Telegram bot](https://www.sohamkamani.com/blog/2016/09/21/making-a-telegram-bot/)
-* [Processing for Android](* [Telegram bot](https://www.sohamkamani.com/blog/2016/09/21/making-a-telegram-bot/)
+* [Processing for Android](https://android.processing.org/)
 
 # Prerequisites
 - Android 9.0 (app has been tested on samsung s9 smartphone)
