@@ -108,11 +108,11 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
             myServo.SetPosition(500 + (angle * 12.1212));  // It normalize the angle between 0 and 180 degrees
             distance = calculateDistance();
             if(distance < dangerDistance) {
-                greenLED = LOW ;
+                greenLED = LOW;
                 redLED = HIGH;
             } else {
-                redLED = LOW ;
-                greenLED = HIGH ;
+                redLED = LOW;
+                greenLED = HIGH;
             }
             distanceService.updateDistanceValue(distance);
             angleService.updateAngleValue(angle);
