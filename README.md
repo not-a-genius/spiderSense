@@ -9,9 +9,9 @@ Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadca
 
 This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. Our idea was to use it along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle) and then visualize real-time data on a smartphone homemade app using BLE connection to pass data. Finally we broadcast a message with location of device to other smartphones through Telegram APIs.
 
-<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg">
+![schema]( https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/digramFinalIot.jpg)
 
-##Files
+## Files
 Files are organized as follows:
 - Android: here you have the Android app files    
 - 'Nucleo Board': here you have Nucleo-F401RE code and custom libraries
