@@ -64,12 +64,12 @@ At the end our globlal system architecture is this:
 - Android 9.0 (app has been tested on samsung s8 smartphone)
 - Nucleo stm32-F401RE board
 - Nucleo IDB05A1 bluetooth shield
-- Telegram app installed 
+- Telegram app installed
 
 # Files
 Files are organized as follows:
 - Android: here you have the Android app files
-- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries 
+- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries
 - 'Telegram Bot': here you have the code to do the telegram bot
 - our_doc: here you have images for readme and other stuff
 - 'Compiled Files': here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
@@ -87,6 +87,8 @@ Now you will have a **.bin** file with the executable for nucleo board.
 
 3. As soon as you give power to the board the code will be executed.
 
+NB: It's possible to copy simply the *.bin* file provided in the *Compiled Files* folder
+
 ## Set the Android App
 1. On android  studio you have to open the folder of the project you can find here: **master/Android/spiderSense**.
 Then you need to build and run the app on your device (you cannot emulate on android studio a smartphone cause of bluetooth connection requirements).
@@ -95,6 +97,8 @@ To do so:
 3. Enable debug mode on your phone.
 4. Press "Run" button and select your device
 5. The app will start automatically on your phone if no error occurs.
+
+NB: It's possible to install simply the *.apk* file provided in the *Compiled Files* folder
 
 ## Set the Telegram bot
 To do so you need do add the bot **@SpiderSenseBot** on Telegram and then register your device sending the message: **/tie \<deviceId\>**, where **\<deviceId\>**  is the username you want to be registered with on the bot.
