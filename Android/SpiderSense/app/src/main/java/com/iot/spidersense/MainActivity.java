@@ -174,30 +174,30 @@ public class MainActivity extends AppCompatActivity {
         alertHandler = new Handler(Looper.getMainLooper());
         timerHandler = new Handler(Looper.getMainLooper());
     }
-/*
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }*/
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            actionbar.hide();
             bottomNavigationView.setVisibility(View.GONE);
-            sketch= new Sketch("fullscreen");
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE
+                                            // Set the content to appear under the system bars so that the
+                                            // content doesn't resize when the system bars hide and show.
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                            // Hide the nav bar and status bar
+                                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            sketch = new Sketch("fullscreen");
             PFragment fragment = new PFragment(sketch);
             fragment.setView(radarContainer, this);
-
         }
         else {
-            getWindow().setFlags(WindowManager.LayoutParams.ALPHA_CHANGED, WindowManager.LayoutParams.ALPHA_CHANGED);
-            actionbar.show();
             bottomNavigationView.setVisibility(View.VISIBLE);
-            sketch= new Sketch();
+            sketch = new Sketch();
             PFragment fragment = new PFragment(sketch);
             fragment.setView(radarContainer, this);
         }
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
-            if(device.getAddress().equals(nucleoMAC)) {
+            if(device.getAddress().equals(nucleoMAC)) { // Nucleo device found
                 btScanner.stopScan(leScanCallback);
                 textview.append("Connected to: " + device.getName()+"\n");
                 btGatt = device.connectGatt(getApplicationContext(), false, bleGattCallback);
@@ -217,8 +217,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Function that starts the scanning of Nucleo device
     public void startScanning() {
-        Log.d(TAG, "start scanning");
+        Log.d(TAG, "Start scanning");
         textview.setText("");
         AsyncTask.execute(new Runnable() {
             @Override
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Main BTLE device callback where much of the logic occurs.
+    // Main BLE device callback where much of the logic occurs.
     private final BluetoothGattCallback bleGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -272,26 +273,29 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Function that receives data from Nucleo board
     private void receiveData(final BluetoothGattCharacteristic characteristic) {
+        // Receiving distance
         if (UUID_DISTANCE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Distance format UINT8.");
             final int distance = characteristic.getIntValue(format, 0);
-            Log.d(TAG, "Received distance: "+ distance);
-            sketch.setDistance( distance);
+            Log.d(TAG, "Received distance: " + distance);
+            sketch.setDistance(distance);
             if(distance < rangeDistance)
                 numOfPresence++;  //one detection more to count
             Log.d(TAG, "" + numOfPresence);
             checkThreat();
         }
+        // Receiving angle
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Angle format UINT8.");
             final int angle = characteristic.getIntValue(format, 0);
-            Log.d(TAG, "Received angle: "+angle);
+            Log.d(TAG, "Received angle: " + angle);
             sketch.setAngle(angle);
 
-            if(angle==0 || angle==165) {
+            if(angle == 0 || angle == 165) {
                 numOfPresence = 0;    //reset counter of detection
                 sentAlert = false;
             }
@@ -357,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //return true if a threat is detected
+    // Function that starts the countdown if a threat is detected
     private void checkThreat(){
         if(numOfPresence > presenceTreshold) {
             stopAlertButton.setEnabled(true);
@@ -371,6 +375,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Function that sends Name and position to telegram bot
     private void sendToTelegram(){
         String url;
         String name = preferenceManager.getString("name", null);
@@ -402,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         ExampleRequestQueue.add(ExampleStringRequest);
+        timerView.setText("Alert sent!");
     }
 
     // Button listeners
