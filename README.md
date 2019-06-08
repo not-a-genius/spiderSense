@@ -69,7 +69,7 @@ At the end our globlal system architecture is this:
 # Files
 Files are organized as follows:
 - Android: here you have the Android app files
-- 'Nucleo Board': here you have Nucleo-F401RE code and custom libraries
+- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries 
 - 'Telegram Bot': here you have the code to do the telegram bot
 - our_doc: here you have images for readme and other stuff
 - 'Compiled Files': here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
@@ -80,7 +80,7 @@ Files are organized as follows:
 ## Set the nucleo board hardware
 Follow the schematic you find on [Hackster.io page](https://www.hackster.io/163479/spider-sense-e3912e).
 ## Set the nucleo board code
-1. Compile on [Mbed online compiler](https://ide.mbed.com/compiler/), or on an offline version, the code for nucleo board you can find in folder: **master/'Nucleo board'**. Here you can find the **"main.cpp"** code file and also the needed custom libraries.
+1. Compile on [Mbed online compiler](https://ide.mbed.com/compiler/), or on an offline version, the code for nucleo board you can find in folder: **master/'Nucleo board'**. Here you can find the **"main.cpp"** code file, the needed custom libraries.
 Now you will have a **.bin** file with the executable for nucleo board.
 
 2.  Copy and paste **.bin** file in the folder of Nucleo board after you have mounted the usb drive.
