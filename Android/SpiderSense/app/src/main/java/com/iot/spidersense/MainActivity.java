@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -67,10 +68,11 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
-    private Button changeThemeButton, stopAlertButton, connectButton, disconnectButton;
+    private Button changeThemeButton, stopAlertButton, connectButton, disconnectButton, saveButton;
     private TextView textview, timerView;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
+    private EditText nameText;
 
     // BLE
     private final static int REQUEST_ENABLE_BT = 1;
@@ -112,14 +114,17 @@ public class MainActivity extends AppCompatActivity {
         stopAlertButton = findViewById(R.id.stopAlertButton);
         connectButton = findViewById(R.id.connectButton);
         disconnectButton = findViewById(R.id.disconnectButton);
+        saveButton = findViewById(R.id.saveNameButton);
         textview = findViewById(R.id.deviceView);
         timerView = findViewById(R.id.timer);
+        nameText = findViewById(R.id.name);
 
         //Set listeners to buttons
         changeThemeButton.setOnClickListener(changeThemeListener);
         stopAlertButton.setOnClickListener(stopAlertListener);
         connectButton.setOnClickListener(connectListener);
         disconnectButton.setOnClickListener(disconnectListener);
+        saveButton.setOnClickListener(saveListener);
 
         //Navbar
         bottomNavigationView = findViewById(R.id.navigation);
@@ -151,6 +156,16 @@ public class MainActivity extends AppCompatActivity {
             MyLocation.enableGPS(activity);
         }
 
+        // User's data
+        SharedPreferences.Editor editor = preferenceManager.edit();
+        boolean firstTime = preferenceManager.getBoolean("firstTime", false);
+        if (!firstTime) {
+            editor.putBoolean("firstTime", true);
+            editor.putString("name", "");
+            editor.commit();
+        }
+        nameText.setText(preferenceManager.getString("name", null));
+
         //Processing
         sketch = new Sketch();
         PFragment fragment = new PFragment(sketch);
@@ -165,19 +180,24 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            actionbar.hide();
             bottomNavigationView.setVisibility(View.GONE);
-            sketch= new Sketch("fullscreen");
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE
+                                            // Set the content to appear under the system bars so that the
+                                            // content doesn't resize when the system bars hide and show.
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                            // Hide the nav bar and status bar
+                                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            sketch = new Sketch("fullscreen");
             PFragment fragment = new PFragment(sketch);
             fragment.setView(radarContainer, this);
-
         }
         else {
-            getWindow().setFlags(WindowManager.LayoutParams.ALPHA_CHANGED, WindowManager.LayoutParams.ALPHA_CHANGED);
-            actionbar.show();
             bottomNavigationView.setVisibility(View.VISIBLE);
-            sketch= new Sketch();
+            sketch = new Sketch();
             PFragment fragment = new PFragment(sketch);
             fragment.setView(radarContainer, this);
         }
@@ -189,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             BluetoothDevice device = result.getDevice();
-            if(device.getAddress().equals(nucleoMAC)) {
+            if(device.getAddress().equals(nucleoMAC)) { // Nucleo device found
                 btScanner.stopScan(leScanCallback);
                 textview.append("Connected to: " + device.getName()+"\n");
                 btGatt = device.connectGatt(getApplicationContext(), false, bleGattCallback);
@@ -197,8 +217,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Function that starts the scanning of Nucleo device
     public void startScanning() {
-        Log.d(TAG, "start scanning");
+        Log.d(TAG, "Start scanning");
         textview.setText("");
         AsyncTask.execute(new Runnable() {
             @Override
@@ -209,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Main BTLE device callback where much of the logic occurs.
+    // Main BLE device callback where much of the logic occurs.
     private final BluetoothGattCallback bleGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -252,26 +273,29 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // Function that receives data from Nucleo board
     private void receiveData(final BluetoothGattCharacteristic characteristic) {
+        // Receiving distance
         if (UUID_DISTANCE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Distance format UINT8.");
             final int distance = characteristic.getIntValue(format, 0);
-            Log.d(TAG, "Received distance: "+ distance);
-            sketch.setDistance( distance);
+            Log.d(TAG, "Received distance: " + distance);
+            sketch.setDistance(distance);
             if(distance < rangeDistance)
                 numOfPresence++;  //one detection more to count
             Log.d(TAG, "" + numOfPresence);
             checkThreat();
         }
+        // Receiving angle
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
             int format = BluetoothGattCharacteristic.FORMAT_UINT8;
             Log.d(TAG, "Angle format UINT8.");
             final int angle = characteristic.getIntValue(format, 0);
-            Log.d(TAG, "Received angle: "+angle);
+            Log.d(TAG, "Received angle: " + angle);
             sketch.setAngle(angle);
 
-            if(angle==0 || angle==165) {
+            if(angle == 0 || angle == 165) {
                 numOfPresence = 0;    //reset counter of detection
                 sentAlert = false;
             }
@@ -337,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //return true if a threat is detected
+    // Function that starts the countdown if a threat is detected
     private void checkThreat(){
         if(numOfPresence > presenceTreshold) {
             stopAlertButton.setEnabled(true);
@@ -351,8 +375,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Function that sends Name and position to telegram bot
     private void sendToTelegram(){
         String url;
+        String name = preferenceManager.getString("name", null);
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             double latitude = 0, longitude = 0;
@@ -362,11 +388,11 @@ public class MainActivity extends AppCompatActivity {
             if (myLocation != null) {
                 latitude = myLocation.getLatitude();
                 longitude = myLocation.getLongitude();
-                url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&lat=" + latitude + "&lon=" + longitude;
+                url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name +"&lat=" + latitude + "&lon=" + longitude;
             }
-            else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+            else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name;
         }
-        else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+        else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name;
         RequestQueue ExampleRequestQueue = Volley.newRequestQueue(activity);
         StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -381,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         ExampleRequestQueue.add(ExampleStringRequest);
+        timerView.setText("Alert sent!");
     }
 
     // Button listeners
@@ -441,6 +468,16 @@ public class MainActivity extends AppCompatActivity {
                 btGatt.close();
                 btGatt = null;
             }
+        }
+    };
+
+    private View.OnClickListener saveListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            SharedPreferences.Editor editor = preferenceManager.edit();
+            editor.putString("name", nameText.getText().toString());
+            editor.commit();
+            Toast.makeText(activity, "Name saved!", Toast.LENGTH_SHORT).show();
         }
     };
 

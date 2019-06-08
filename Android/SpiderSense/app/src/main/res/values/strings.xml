@@ -5,7 +5,9 @@
     <string name="stop_alert_button">Stop alert</string>
     <string name="connect_button">Connect</string>
     <string name="disconnect_button">Disconnect</string>
+    <string name="save_button">Save</string>
     <string name="fragment_home">Home</string>
     <string name="fragment_settings">Settings</string>
     <string name="timer_text">10s</string>
+    <string name="form_name">Name</string>
 </resources>
