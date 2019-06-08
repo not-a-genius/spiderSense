@@ -1,15 +1,66 @@
+[![Build Status][build-shield]]()
+[![Contributors][contributors-shield]]()
+[![License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 # SpiderSense
 Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadcast messages on Telegram.
 
-<!-- image of acrhitecture
-<img src="">
--->
+<p align="center">
+  <a href="https://www.hackster.io/163479/spider-sense-e3912e">
+    <img src="/our_docs/readme_images/allProj.png" alt="Logo" width="80" height="80">
+  </a>
+## Table of Contents
 
-## Description
+* [About the Project](#about-the-project)
+ * [Architecture](#architecture)
+* [Built With](#built-with)
+* [Prerequisites](#prerequisites)
+* [Files](#files)
+* [Getting started](#getting-started)
+ * [Set the nucleo board hardware](#set-the-nucleo-board-hardware)
+ * [Set the nucleo board code](#set-the-nucleo-board-code)
+ * [Set the Android app](#set-the-android-app)
+ * [Set Telegram bot](#set-the-telegram-bot)
+* [Usage](#usage)
+* [Future Features](#future-features)
+* [Contributing](#contributing)
+* [Credits](#credits)
+* [License](#license)
 
-This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. Our idea was to use it along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle) and then visualize real-time data on a smartphone homemade app using BLE connection to pass data. Finally we broadcast a message with location of device to other smartphones through Telegram APIs.
 
+# About the project
+
+This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. 
+Following the design strategy learnt in the course we started from persona, problem space and use case scenarios to come with an idea.
+<p align="center">
+	<h2> Slides about design idea <h2> 
+  <a href="https://www.slideshare.net/GiuseppeCapaldi/spidersense-project-design-idea">
+    <img src="/our_docs/readme_images/Slideshare-logo.jpeg" alt="Logo" width="80" height="80">
+  </a>
+</p>
+
+Then we moved towards an mvp presentation starting to focus in technology. We came up with a simpler architecture without camera YOLO based detection but adding a servo motor and a radar animation possible thanks to it and other changes.
+<p align="center">
+	<h2> Slides about project mvp <h2> 
+  <a href="https://www.slideshare.net/GiuseppeCapaldi/spider-sense-project-first-mvp">
+    <img src="/our_docs/readme_images/Slideshare-logo.jpeg" alt="Logo" width="80" height="80">
+  </a>
+</p>
+From this we discuss with professor to change some architectural parts, replacing the raspberry with a stm32 bluetooth module he gave to us and developing a brand new Android app from scratch. 
+		
+So we used nucleo board along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle) and then visualize real-time data on a smartphone homemade app using BLE connection to pass data. Finally we broadcast a message with location of device to other smartphones through Telegram APIs.
+
+# Architecture
+At the end our globlal system architecture is this: 
 <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg"></img>
+
+# Built with
+* [Android](https://developer.android.com/)
+* [MbedOs](https://www.mbed.com/en/platform/mbed-os/)
+* [Telegram bot](https://www.sohamkamani.com/blog/2016/09/21/making-a-telegram-bot/)
+* [Processing for Android](* [Telegram bot](https://www.sohamkamani.com/blog/2016/09/21/making-a-telegram-bot/)
+
 
 # Files
 
@@ -22,9 +73,9 @@ Files are organized as follows:
 
 
 # Getting started 
-## Set the nucleo board (hardware) 
+## Set the nucleo board hardware 
 Follow the schematic you find on [Hackster.io page](https://www.hackster.io/163479/spider-sense-e3912e).
-## Set the nucleo board (software) 
+## Set the nucleo board code 
 1. Compile on [Mbed online compiler](https://ide.mbed.com/compiler/), or on an offline version, the code for nucleo board you can find in folder: " master/'Nucleo board' ". Here you can find the main.cpp code file and also the needed custom libraries.
 Now you will have a .bin file with the executable for nucleo board.
 
@@ -41,7 +92,7 @@ To do so:
 4. Press "Run" button and select your device 
 5. The app will start automatically on your phone if no error occurs.
 
-## Set telegram bot
+## Set the Telegram bot
 To do so you need do add the bot @SpiderSenseBot on Telegram and then register your device sending the message: /tie \<deviceId\>, where \<deviceId\>  is the username you want to be registerd with on the bot.
 Now you are ready to receive notification of messages from the bot.
 
@@ -90,6 +141,19 @@ What all the devices registered on telegram bot should see is a message with the
 Features to be implemented:
 - other android versions compatibility
 - improve UI and app look and feel
+- encrypt data towards telegram servers
+- make auth login in app 
+- improve nucleo hw/sw
+
+# Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 # Credits:
 - Giuseppe Capaldi [<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/gitIcon.png" height="20" width="20" >](https://github.com/not-a-genius)
@@ -102,3 +166,4 @@ Features to be implemented:
 
 # License:
  Code is under Apache License 2.0.
+ 
