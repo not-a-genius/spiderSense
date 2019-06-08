@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -67,10 +68,11 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferenceManager;
     private Boolean doubleBackToExitPressedOnce = false;
     private int theme;
-    private Button changeThemeButton, stopAlertButton, connectButton, disconnectButton;
+    private Button changeThemeButton, stopAlertButton, connectButton, disconnectButton, saveButton;
     private TextView textview, timerView;
     private BottomNavigationView bottomNavigationView;
     private android.support.v7.app.ActionBar actionbar;
+    private EditText nameText;
 
     // BLE
     private final static int REQUEST_ENABLE_BT = 1;
@@ -112,14 +114,17 @@ public class MainActivity extends AppCompatActivity {
         stopAlertButton = findViewById(R.id.stopAlertButton);
         connectButton = findViewById(R.id.connectButton);
         disconnectButton = findViewById(R.id.disconnectButton);
+        saveButton = findViewById(R.id.saveNameButton);
         textview = findViewById(R.id.deviceView);
         timerView = findViewById(R.id.timer);
+        nameText = findViewById(R.id.name);
 
         //Set listeners to buttons
         changeThemeButton.setOnClickListener(changeThemeListener);
         stopAlertButton.setOnClickListener(stopAlertListener);
         connectButton.setOnClickListener(connectListener);
         disconnectButton.setOnClickListener(disconnectListener);
+        saveButton.setOnClickListener(saveListener);
 
         //Navbar
         bottomNavigationView = findViewById(R.id.navigation);
@@ -151,6 +156,16 @@ public class MainActivity extends AppCompatActivity {
             MyLocation.enableGPS(activity);
         }
 
+        // User's data
+        SharedPreferences.Editor editor = preferenceManager.edit();
+        boolean firstTime = preferenceManager.getBoolean("firstTime", false);
+        if (!firstTime) {
+            editor.putBoolean("firstTime", true);
+            editor.putString("name", "");
+            editor.commit();
+        }
+        nameText.setText(preferenceManager.getString("name", null));
+
         //Processing
         sketch = new Sketch();
         PFragment fragment = new PFragment(sketch);
@@ -159,6 +174,11 @@ public class MainActivity extends AppCompatActivity {
         alertHandler = new Handler(Looper.getMainLooper());
         timerHandler = new Handler(Looper.getMainLooper());
     }
+/*
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }*/
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -353,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendToTelegram(){
         String url;
+        String name = preferenceManager.getString("name", null);
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             double latitude = 0, longitude = 0;
@@ -362,11 +383,11 @@ public class MainActivity extends AppCompatActivity {
             if (myLocation != null) {
                 latitude = myLocation.getLatitude();
                 longitude = myLocation.getLongitude();
-                url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&lat=" + latitude + "&lon=" + longitude;
+                url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name +"&lat=" + latitude + "&lon=" + longitude;
             }
-            else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+            else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name;
         }
-        else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId";
+        else url = "https://guarded-mountain-88932.herokuapp.com/notification?device_id=deviceId&name=" + name;
         RequestQueue ExampleRequestQueue = Volley.newRequestQueue(activity);
         StringRequest ExampleStringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -441,6 +462,16 @@ public class MainActivity extends AppCompatActivity {
                 btGatt.close();
                 btGatt = null;
             }
+        }
+    };
+
+    private View.OnClickListener saveListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            SharedPreferences.Editor editor = preferenceManager.edit();
+            editor.putString("name", nameText.getText().toString());
+            editor.commit();
+            Toast.makeText(activity, "Name saved!", Toast.LENGTH_SHORT).show();
         }
     };
 
