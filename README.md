@@ -28,11 +28,11 @@ Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadca
 
 # About the project
 
-This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board. 
+This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board.
 Following the design strategy learnt in the course we started from persona, problem space and use case scenarios to come with an idea.
 - Slides about the design idea:
 <p align="center">
- 
+
   <a href="https://www.slideshare.net/GiuseppeCapaldi/spidersense-project-design-idea">
     <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/Slideshare-logo.jpeg" width="80" height="80">
   </a>
@@ -41,17 +41,17 @@ Following the design strategy learnt in the course we started from persona, prob
 Then we moved towards an mvp presentation starting to focus in technology. We moved to a simpler architecture without camera YOLO based detection but adding a servo motor and a radar animation that is possible thanks to it and to Processing APIs.
 - Slides about project mvp:
 <p align="center">
-	 
+
   <a href="https://www.slideshare.net/GiuseppeCapaldi/spider-sense-project-first-mvp">
     <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/Slideshare-logo.jpeg" width="80" height="80">
   </a>
 </p>
-From this we discussed with professor and analyzed feedbacks. After that we changed some architectural parts, replacing the Raspberry-PI board with a stm32 bluetooth module the professor gave to us and developing a brand new Android app from scratch. 
-		
+From this we discussed with professor and analyzed feedbacks. After that we changed some architectural parts, replacing the Raspberry-PI board with a stm32 bluetooth module the professor gave to us and developing a brand new Android app from scratch.
+
 So we used nucleo board along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle). Then we visualize real-time data on a smartphone homemade app using BLE connection (using IDB05A1 module) to pass data. Finally we broadcast a message every time the alarm (obstacle in proximity of the user) with location of device to other smartphones through Telegram APIs.
 
 # Architecture
-At the end our globlal system architecture is this: 
+At the end our globlal system architecture is this:
 <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg"></img>
 
 # Built with
@@ -61,24 +61,25 @@ At the end our globlal system architecture is this:
 * [Processing for Android](https://android.processing.org/)
 
 # Prerequisites
-- Android 9.0 (app has been tested on samsung s9 smartphone)
+- Android 9.0 (app has been tested on samsung s8 smartphone)
 - Nucleo stm32-F401RE board
 - Nucleo IDB05A1 bluetooth shield
 - Telegram app installed 
 
 # Files
 Files are organized as follows:
-- Android: here you have the Android app files    
+- Android: here you have the Android app files
 - 'Nucleo Board': here you have Nucleo-F401RE code and custom libraries
 - 'Telegram Bot': here you have the code to do the telegram bot
 - our_doc: here you have images for readme and other stuff
+- 'Compiled Files': here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
 
 
 
-# Getting started 
-## Set the nucleo board hardware 
+# Getting started
+## Set the nucleo board hardware
 Follow the schematic you find on [Hackster.io page](https://www.hackster.io/163479/spider-sense-e3912e).
-## Set the nucleo board code 
+## Set the nucleo board code
 1. Compile on [Mbed online compiler](https://ide.mbed.com/compiler/), or on an offline version, the code for nucleo board you can find in folder: **master/'Nucleo board'**. Here you can find the **"main.cpp"** code file and also the needed custom libraries.
 Now you will have a **.bin** file with the executable for nucleo board.
 
@@ -87,12 +88,12 @@ Now you will have a **.bin** file with the executable for nucleo board.
 3. As soon as you give power to the board the code will be executed.
 
 ## Set the Android App
-1. On android  studio you have to open the folder of the project you can find here: **master/Android/spiderSense**. 
-Then you need to build and run the app on your device (you cannot emulate on android studio a smartphone cause of bluetooth connection requirements). 
+1. On android  studio you have to open the folder of the project you can find here: **master/Android/spiderSense**.
+Then you need to build and run the app on your device (you cannot emulate on android studio a smartphone cause of bluetooth connection requirements).
 To do so:
-2. Connect your phone through usb, give permission to trust your computer 
-3. Enable debug mode on your phone. 
-4. Press "Run" button and select your device 
+2. Connect your phone through usb, give permission to trust your computer
+3. Enable debug mode on your phone.
+4. Press "Run" button and select your device
 5. The app will start automatically on your phone if no error occurs.
 
 ## Set the Telegram bot
@@ -101,7 +102,7 @@ Now you are ready to receive notification of messages from the bot.
 
 # Usage
 
-Having the nucleo board connected and running the IDB05A1 module attached on top of nucleo board will start "advertising", broadcasting data to the devices in the signal field. 
+Having the nucleo board connected and running the IDB05A1 module attached on top of nucleo board will start "advertising", broadcasting data to the devices in the signal field.
 
 Start SpiderSense app and click on Settings -> Connect.
 If the board is recognized you will see the text Spidersense appear on the settings sceen.
@@ -111,14 +112,14 @@ Now the nucleo board will start moving the servo and receving data from ultrason
 On your app, coming back to home screen, you should see a radar animation showing what data the app is receiving from the nucleo board, so the angle in which the servo is positioned and the obstacle distance (if it is detected in a close range).
 
 Now if the number of detected objects in a close field goes over a fixed threshold a timer will start.
-You should see a countdown text animation on the settings screen. 
+You should see a countdown text animation on the settings screen.
 If within 10 sec you don't press the stop the alarm button a message with your id and location will be sent to all the devices registered on the SpiderSense telegram bot.
 
 If you press the stop the alarm button the counter of objects detected will be reset, ready to trigger the alarm timer again.
 
 You can also disconnect and connect again to the board.
 
-What all the devices registered on telegram bot should see is a message with the id linked to the device which triggered the alarm and an image from google maps apis showing its gps location. 
+What all the devices registered on telegram bot should see is a message with the id linked to the device which triggered the alarm and an image from google maps apis showing its gps location.
 
 
 
@@ -128,7 +129,7 @@ Features to be implemented:
 - other android versions compatibility
 - improve UI and app look and feel
 - encrypt data towards telegram servers
-- make auth login in app 
+- make auth login in app
 - improve nucleo hw/sw
 
 # Contributing
@@ -152,4 +153,3 @@ Contributions are what make the open source community such an amazing place to b
 
 # License:
  Code is under Apache License 2.0.
- 
