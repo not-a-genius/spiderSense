@@ -34,7 +34,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -182,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView.setVisibility(View.GONE);
             View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                                             // Set the content to appear under the system bars so that the
                                             // content doesn't resize when the system bars hide and show.
                                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -197,6 +196,11 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             bottomNavigationView.setVisibility(View.VISIBLE);
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
             sketch = new Sketch();
             PFragment fragment = new PFragment(sketch);
             fragment.setView(radarContainer, this);
