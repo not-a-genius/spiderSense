@@ -25,6 +25,7 @@ static const uint16_t uuid16_list[] = {UUID_DISTANCE_SERVICE, UUID_ANGLE_SERVICE
 static volatile bool  triggerSensorPolling = false;
 static bool increment = true;
 static double periodicCallbackTime = 0.2;
+static int dangerDistance = 20;
 
 // Defines Tirg and Echo pins of the Ultrasonic Sensor
 HCSR04 sensor = HCSR04(D9, D8);
@@ -106,7 +107,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
             // rotates the servo motor
             myServo.SetPosition(500 + (angle * 12.1212));  // It normalize the angle between 0 and 180 degrees
             distance = calculateDistance();
-            if(distance < 20) {
+            if(distance < dangerDistance) {
                 greenLED = LOW ;
                 redLED = HIGH;
             } else {

@@ -2,6 +2,10 @@
     <string name="app_name">Spider Sense</string>
     <string name="change_theme_text">Change Theme: </string>
     <string name="change_theme_button">Light/Dark</string>
+    <string name="stop_alert_button">Stop alert</string>
+    <string name="connect_button">Connect</string>
+    <string name="disconnect_button">Disconnect</string>
     <string name="fragment_home">Home</string>
     <string name="fragment_settings">Settings</string>
+    <string name="timer_text">10s</string>
 </resources>

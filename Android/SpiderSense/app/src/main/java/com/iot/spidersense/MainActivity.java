@@ -57,6 +57,9 @@ import processing.android.PFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "DEBUG"; //For debug
+
+    // Activity variables
     private Activity activity;
     private Sketch sketch;
     private FrameLayout radarContainer;
@@ -71,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     // BLE
     private final static int REQUEST_ENABLE_BT = 1;
-    private final String TAG = "GattCallback";
-    private String nucleoMAC = "C6:50:E7:03:82:BE";
+    private final String nucleoMAC = "C6:50:E7:03:82:BE";
     private final static UUID UUID_DISTANCE_MEASUREMENT = UUID.fromString(GattAttributes.DISTANCE_MEASUREMENT);
     private final static UUID UUID_ANGLE_MEASUREMENT = UUID.fromString(GattAttributes.ANGLE_MEASUREMENT);
     private BluetoothManager btManager;
@@ -81,11 +83,10 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothGatt btGatt;
 
     // Alert
-    private int numOfPresence = 0;
+    private int numOfPresence = 0, presenceTreshold = 20, rangeDistance = 40, countdownTimer = 10;
     private boolean sentAlert = false;
     private LocationManager locationManager;
     private Handler alertHandler, timerHandler;
-    private int countdownTimer = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,14 +191,14 @@ public class MainActivity extends AppCompatActivity {
             BluetoothDevice device = result.getDevice();
             if(device.getAddress().equals(nucleoMAC)) {
                 btScanner.stopScan(leScanCallback);
-                textview.append(device.getName()+"\n");
+                textview.append("Connected to: " + device.getName()+"\n");
                 btGatt = device.connectGatt(getApplicationContext(), false, bleGattCallback);
             }
         }
     };
 
     public void startScanning() {
-        System.out.println("start scanning");
+        Log.d(TAG, "start scanning");
         textview.setText("");
         AsyncTask.execute(new Runnable() {
             @Override
@@ -212,14 +213,13 @@ public class MainActivity extends AppCompatActivity {
     private final BluetoothGattCallback bleGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.i(TAG, "Connected to GATT server.");
+                Log.d(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:" + btGatt.discoverServices());
+                Log.d(TAG, "Attempting to start service discovery:" + btGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.i(TAG, "Disconnected from GATT server.");
+                Log.d(TAG, "Disconnected from GATT server.");
             }
         }
 
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                Log.d(TAG, "onServicesDiscovered received: " + status);
             }
         }
 
@@ -259,9 +259,9 @@ public class MainActivity extends AppCompatActivity {
             final int distance = characteristic.getIntValue(format, 0);
             Log.d(TAG, "Received distance: "+ distance);
             sketch.setDistance( distance);
-            if(distance < 40)
+            if(distance < rangeDistance)
                 numOfPresence++;  //one detection more to count
-            Log.i("numOfPresence", ""+numOfPresence);
+            Log.d(TAG, "" + numOfPresence);
             checkThreat();
         }
         else if (UUID_ANGLE_MEASUREMENT.equals(characteristic.getUuid())) {
@@ -309,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
             }, 2000);
         } else {
             super.onBackPressed();
-            return;
         }
     }
 
@@ -340,11 +339,11 @@ public class MainActivity extends AppCompatActivity {
 
     //return true if a threat is detected
     private void checkThreat(){
-        if(numOfPresence > 20) {
+        if(numOfPresence > presenceTreshold) {
             stopAlertButton.setEnabled(true);
             stopAlertButton.refreshDrawableState();
             if(!sentAlert) {
-                Log.d("[telegram]","Sending to telegram");
+                Log.d(TAG,"Sending to telegram");
                 alertHandler.postDelayed(alertRunnable, countdownTimer * 1000);
                 timerHandler.postDelayed(timerRunnable, 1000);
                 sentAlert = true;
@@ -374,8 +373,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(String response) {
                 //This code is executed if the server responds, whether or not the response contains data.
                 //The String 'response' contains the server's response.
-                //You can test it by printing response.substring(0,500) to the screen.
-                //Log.i(, "Get request performed");
             }
         }, new Response.ErrorListener() { //Create an error listener to handle errors appropriately.
             @Override

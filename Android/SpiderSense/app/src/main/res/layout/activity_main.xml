@@ -12,13 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
-    <Button
-        android:id="@+id/drawButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Draw"
-        android:visibility="gone"
-        android:textSize="20sp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,12 +26,56 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
+            <Button
+                android:id="@+id/stopAlertButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_alert_button"
+                android:enabled="false"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/timer"
+                android:paddingStart="20dp"
+                android:textSize="20sp"
+                android:text="@string/timer_text"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/connectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/connect_button"
+            android:textSize="20sp"/>
+
+        <Button
+            android:id="@+id/disconnectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/disconnect_button"
+            android:visibility="gone"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:id="@+id/deviceView"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom">
+
             <TextView
                 android:id="@+id/changeThemeString"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/change_theme_text"
-                android:paddingEnd="20px"
+                android:paddingEnd="20dp"
                 android:textSize="20sp"/>
 
             <Button
@@ -49,47 +86,6 @@
                 android:textSize="20sp"/>
 
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/stopAlertButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Stop alert"
-                android:enabled="false"
-                android:textSize="20sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/timer"
-                android:paddingStart="20px"
-                android:text="10 s"/>
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/connectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Connect"
-            android:textSize="20sp"/>
-
-        <Button
-            android:id="@+id/disconnectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Disconnect"
-            android:visibility="gone"
-            android:textSize="20sp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/deviceView"/>
 
     </LinearLayout>
 
