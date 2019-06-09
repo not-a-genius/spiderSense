@@ -286,8 +286,7 @@ public class MainActivity extends AppCompatActivity {
             final int distance = characteristic.getIntValue(format, 0);
             Log.d(TAG, "Received distance: " + distance);
             sketch.setDistance(distance);
-            if(distance < rangeDistance)
-                numOfPresence++;  //one detection more to count
+            if(distance < rangeDistance) numOfPresence++;  //one detection more to count
             Log.d(TAG, "" + numOfPresence);
             checkThreat();
         }
@@ -312,10 +311,8 @@ public class MainActivity extends AppCompatActivity {
                 final StringBuilder stringBuilder = new StringBuilder(data.length);
                 for(byte byteChar : data)
                     stringBuilder.append(String.format("%02X ", byteChar));
-
             }
         }
-
     }
 
     @Override
