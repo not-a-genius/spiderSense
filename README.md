@@ -97,6 +97,8 @@ Now you will have a **.bin** file with the executable for nucleo board.
 
 3. As soon as you give power to the board the code will be executed.
 
+NB: It's possible to copy simply the *.bin* file provided in the *Compiled Files* folder
+
 ## Set the Android App
 1. On android  studio you have to open the folder of the project you can find here: **master/Android/spiderSense**.
 Then you need to build and run the app on your device (you cannot emulate on android studio a smartphone cause of bluetooth connection requirements).
@@ -105,6 +107,8 @@ To do so:
 3. Enable debug mode on your phone.
 4. Press "Run" button and select your device
 5. The app will start automatically on your phone if no error occurs.
+
+NB: It's possible to install simply the *.apk* file provided in the *Compiled Files* folder
 
 ## Set the Telegram bot
 To do so you need do add the bot **@SpiderSenseBot** on Telegram and then register your device sending the message: **/tie \<deviceId\>**, where **\<deviceId\>**  is the username you want to be registered with on the bot.
