@@ -55,21 +55,29 @@ At the end our globlal system architecture is this:
 <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg"></img>
 
 # Built with
-* [Android](https://developer.android.com/)
+
+**Nucleo board** 
 * [MbedOs](https://www.mbed.com/en/platform/mbed-os/)
-* [Telegram bot](https://www.sohamkamani.com/blog/2016/09/21/making-a-telegram-bot/)
+
+**Android app**
+* [Android](https://developer.android.com/)
 * [Processing for Android](https://android.processing.org/)
+
+**Telegram bot**
+* [Node js](https://nodejs.org/it/)
+* [Mongo db](https://www.mongodb.com/it)
+* [Heroku](https://elements.heroku.com/addons/mongolab)
 
 # Prerequisites
 - Android 9.0 (app has been tested on samsung s8 smartphone)
 - Nucleo stm32-F401RE board
 - Nucleo IDB05A1 bluetooth shield
-- Telegram app installed
+- Telegram app installed 
 
 # Files
 Files are organized as follows:
 - Android: here you have the Android app files
-- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries
+- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries 
 - 'Telegram Bot': here you have the code to do the telegram bot
 - our_doc: here you have images for readme and other stuff
 - 'Compiled Files': here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
@@ -87,8 +95,6 @@ Now you will have a **.bin** file with the executable for nucleo board.
 
 3. As soon as you give power to the board the code will be executed.
 
-NB: It's possible to copy simply the *.bin* file provided in the *Compiled Files* folder
-
 ## Set the Android App
 1. On android  studio you have to open the folder of the project you can find here: **master/Android/spiderSense**.
 Then you need to build and run the app on your device (you cannot emulate on android studio a smartphone cause of bluetooth connection requirements).
@@ -98,11 +104,25 @@ To do so:
 4. Press "Run" button and select your device
 5. The app will start automatically on your phone if no error occurs.
 
-NB: It's possible to install simply the *.apk* file provided in the *Compiled Files* folder
-
 ## Set the Telegram bot
 To do so you need do add the bot **@SpiderSenseBot** on Telegram and then register your device sending the message: **/tie \<deviceId\>**, where **\<deviceId\>**  is the username you want to be registered with on the bot.
 Now you are ready to receive notification of messages from the bot.
+
+The purpose of this telegram bot is to let people who are interested in particular device, receive urgent notifications from it.
+A device sends GET request with its id to the server which also serves as a Telegram bot. Then, the bot will send notifications to users who are associated with the device. It's also possible to send geo data(latitude and longitude) about current position to the server so people in charge of will also know where the device is.
+
+To associate a Telegram account with a device, user should speak with the bot and send to him the following command:
+```
+/tie {device}
+```
+Where **device** is a device username chosen by user.
+
+So, if the device with such id will send a request, the user will be notified.
+
+To store telegram accounts associated with devices, the server uses MongoDB.
+
+
+
 
 # Usage
 
@@ -125,7 +145,8 @@ You can also disconnect and connect again to the board.
 
 What all the devices registered on telegram bot should see is a message with the id linked to the device which triggered the alarm and an image from google maps apis showing its gps location.
 
-
+Example of a message from the bot:
+<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/Message_example.png" align="center"></img>
 
 
 # Future Features
