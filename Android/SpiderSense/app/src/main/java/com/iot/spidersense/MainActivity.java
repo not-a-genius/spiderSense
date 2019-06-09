@@ -408,7 +408,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         ExampleRequestQueue.add(ExampleStringRequest);
-        timerView.setText("Alert sent!");
     }
 
     // Button listeners
@@ -505,6 +504,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             sendToTelegram();
+            timerHandler.removeCallbacks(timerRunnable);
+            countdownTimer = 10;
+            timerView.setText("Alert sent!");
         }
     };
 
