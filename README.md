@@ -53,8 +53,9 @@ So we used nucleo board along with a simple homemade "radar architecture" to do 
 # Architecture
 At the end our globlal system architecture is this:
 <p align="center">
-<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg"></img>
+<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg" width="70%" height="70%"></img>
 </p>
+
 # Built with
 
 **Nucleo board**
