@@ -33,6 +33,7 @@ public class Sketch extends PApplet {
 
     public void setup() {}
 
+    //animation loop
     public void draw() {
         fill(0, 191, 255);
         // simulating motion blur and slow fade of the moving line

@@ -27,6 +27,7 @@ import static android.content.Context.LOCATION_SERVICE;
 
 public class MyLocation {
 
+    //overload method passing context
     public static Location getLastKnownLocation(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         List<String> providers = locationManager.getProviders(true);
