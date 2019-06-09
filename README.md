@@ -134,6 +134,7 @@ If the board is recognized you will see the text Spidersense appear on the setti
 Now the nucleo board will start moving the servo and receving data from ultrasonic sensor.
 
 On your app, coming back to home screen, you should see a radar animation showing what data the app is receiving from the nucleo board, so the angle in which the servo is positioned and the obstacle distance (if it is detected in a close range).
+<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/mock2.jpg" align="center"></img>
 
 Now if the number of detected objects in a close field goes over a fixed threshold a timer will start.
 You should see a countdown text animation on the settings screen.
@@ -142,6 +143,7 @@ If within 10 sec you don't press the stop the alarm button a message with your i
 If you press the stop the alarm button the counter of objects detected will be reset, ready to trigger the alarm timer again.
 
 You can also disconnect and connect again to the board.
+<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/mock1.jpg" align="center"></img>
 
 What all the devices registered on telegram bot should see is a message with the id linked to the device which triggered the alarm and an image from google maps apis showing its gps location.
 
