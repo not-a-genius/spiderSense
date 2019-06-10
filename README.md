@@ -11,6 +11,7 @@ Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadca
 
 * [About the Project](#about-the-project)
   * [Architecture](#architecture)
+  * [Schematics](#schematics)
 * [Built With](#built-with)
 * [Prerequisites](#prerequisites)
 * [Files](#files)
@@ -31,8 +32,8 @@ Smartphone app to visualize data from a nucleo STM32-F401RE board and to broadca
 This is a group project made by three students of Sapienza University of Rome for Iot course. The task was to design, develope and document a personal project making use of Nucleo-F401RE board.
 Following the design strategy learnt in the course we started from persona, problem space and use case scenarios to come with an idea.
 - Slides about the design idea:
-<p align="center">
 
+<p align="center">
   <a href="https://www.slideshare.net/GiuseppeCapaldi/spidersense-project-design-idea">
     <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/Slideshare-logo.jpeg" width="80" height="80">
   </a>
@@ -40,8 +41,8 @@ Following the design strategy learnt in the course we started from persona, prob
 
 Then we moved towards an mvp presentation starting to focus in technology. We moved to a simpler architecture without camera YOLO based detection but adding a servo motor and a radar animation that is possible thanks to it and to Processing APIs.
 - Slides about project mvp:
-<p align="center">
 
+<p align="center">
   <a href="https://www.slideshare.net/GiuseppeCapaldi/spider-sense-project-first-mvp">
     <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/Slideshare-logo.jpeg" width="80" height="80">
   </a>
@@ -50,11 +51,31 @@ From this we discussed with professor and analyzed feedbacks. After that we chan
 
 So we used nucleo board along with a simple homemade "radar architecture" to do obstacle proximity detection (based on distance and angle). Then we visualize real-time data on a smartphone homemade app using BLE connection (using IDB05A1 module) to pass data. Finally we broadcast a message every time the alarm (obstacle in proximity of the user) with location of device to other smartphones through Telegram APIs.
 
-# Architecture
+You can go on hackster for details about development and hardware.
+- Hackster page:
+
+<p align="center">
+  <a href="https://www.hackster.io/163479/spider-sense-e3912e">
+    <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/hacksterLogo.gif" width="120" >
+  </a>
+</p>
+
+## Architecture
 At the end our globlal system architecture is this:
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/diagramFinalIot.jpg" width="70%" height="70%"></img>
 </p>
+
+## Schematics
+Here you can find the schematics for hardware configuration (go to hackster link for details):
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/not-a-genius/spiderSense/master/our_doc/readme_images/schematics2.png" width="70%" height="70%"></img>
+</p>
+
+*Note*: on top of Nucleo-F401RE you will have the IDB05A1 board (not visible in the image).
+
 
 # Built with
 
@@ -78,11 +99,11 @@ At the end our globlal system architecture is this:
 
 # Files
 Files are organized as follows:
-- Android: here you have the Android app files
-- 'Nucleo Board': here you have Nucleo-F401RE code and used libraries
-- 'Telegram Bot': here you have the code to do the telegram bot
-- our_doc: here you have images for readme and other stuff
-- 'Compiled Files': here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
+- **Android**: here you have the Android app files
+- **'Nucleo Board'**: here you have Nucleo-F401RE code and used libraries
+- **'Telegram Bot'**: here you have the code to do the telegram bot
+- **our_doc**: here you have images for readme and other stuff
+- **'Compiled Files'**: here you have apk file to install on your Android smartphone and bin file to copy on Nucleo board
 
 
 
