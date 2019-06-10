@@ -27,7 +27,7 @@ static bool increment = true;
 static double periodicCallbackTime = 0.2;
 static int dangerDistance = 20;
 
-// Defines Tirg and Echo pins of the Ultrasonic Sensor
+// Defines Trig and Echo pins of the Ultrasonic Sensor
 HCSR04 sensor = HCSR04(D9, D8);
 
 // Define pin for Servo
@@ -84,7 +84,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
     // Setup distance and angle services
     uint8_t distance = 60;
     DistanceService distanceService(ble, distance);
-    
+
     uint8_t angle = 15;
     AngleService angleService(ble, angle);
 
@@ -95,7 +95,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
     ble.gap().setAdvertisingType(GapAdvertisingParams::ADV_CONNECTABLE_UNDIRECTED);
     ble.gap().setAdvertisingInterval(50);
     ble.gap().startAdvertising();
-    
+
     myServo.Enable(1500,20000);
 
     // infinite loop
@@ -103,7 +103,7 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params) {
         // check for trigger from periodicCallback()
         if (triggerSensorPolling && ble.getGapState().connected) {
             triggerSensorPolling = false;
-            
+
             // rotates the servo motor
             myServo.SetPosition(500 + (angle * 12.1212));  // It normalize the angle between 0 and 180 degrees
             distance = calculateDistance();
@@ -131,4 +131,3 @@ int main(void) {
     ticker.attach(periodicCallback, periodicCallbackTime);
     BLE::Instance().init(bleInitComplete);
 }
-
